@@ -1,52 +1,56 @@
 class User {
-  String phone;
-  String name;
-  String token;
-  var loginMethod;
-  String? socialId;
-  bool isGottenLineId;
-  bool isOwner;
+  String? phone;
+  String? name;
+  bool? isOwner;
+  String? company;
+  String? address;
+  String? vehicalLicence;
+  String? vehicalOwner;
+  String? vehicalEngineNumber;
+  String? vehicalBodyNumber;
+  String? vehicalLicenceImage;
+  bool? isGottenLineId;
 
-  User({required this.phone, required this.name, required this.token, this.loginMethod = LoginMethod.phone, this.socialId, required this.isGottenLineId, required this.isOwner});
+  User(
+      {this.phone,
+        this.name,
+        this.isOwner,
+        this.company,
+        this.address,
+        this.vehicalLicence,
+        this.vehicalOwner,
+        this.vehicalEngineNumber,
+        this.vehicalBodyNumber,
+        this.vehicalLicenceImage,
+        this.isGottenLineId});
 
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      phone: json['phone'],
-      name: json['name'],
-      token: json['token'],
-      loginMethod: json['loginMethod'],
-      socialId: json['socialId'],
-      isGottenLineId: json['isGottenLineId'],
-      isOwner: json['isOwner']
-    );
+  User.fromJson(Map<String, dynamic> json) {
+    phone = json['phone'];
+    name = json['name'];
+    isOwner = json['isOwner'];
+    company = json['company'];
+    address = json['address'];
+    vehicalLicence = json['vehicalLicence'];
+    vehicalOwner = json['vehicalOwner'];
+    vehicalEngineNumber = json['vehicalEngineNumber'];
+    vehicalBodyNumber = json['vehicalBodyNumber'];
+    vehicalLicenceImage = json['vehicalLicenceImage'];
+    isGottenLineId = json['is_gotten_line_id'];
   }
-
-  // User.fromJson(Map<String, dynamic> json) {
-  //   phone = json['phone'];
-  //   name = json['name'];
-  //   // token = json['token'];
-  //   // loginMethod = json['loginMethod'];
-  //   // socialID = json['socialID'];
-  //   // isGottenLineID = json['isGottenLineID'];
-  //
-  //   if(json['is_gotten_line_id']!=null){
-  //     isGottenLineID = json['is_gotten_line_id'];
-  //   }else{
-  //     isGottenLineID = false;
-  //   }
-  //
-  // }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['phone'] = this.phone;
     data['name'] = this.name;
+    data['isOwner'] = this.isOwner;
+    data['company'] = this.company;
+    data['address'] = this.address;
+    data['vehicalLicence'] = this.vehicalLicence;
+    data['vehicalOwner'] = this.vehicalOwner;
+    data['vehicalEngineNumber'] = this.vehicalEngineNumber;
+    data['vehicalBodyNumber'] = this.vehicalBodyNumber;
+    data['vehicalLicenceImage'] = this.vehicalLicenceImage;
+    data['is_gotten_line_id'] = this.isGottenLineId;
     return data;
   }
-}
-
-enum LoginMethod{
-  phone,
-  lineID,
 }

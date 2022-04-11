@@ -1,10 +1,11 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/pages/member/register/register_identity_social.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
-import 'package:flutter_tour_bus_new/pages/booking/rental_agreement.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'register_social.dart';
 import 'package:flutter_tour_bus_new/constant.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -38,14 +39,19 @@ class _LoginRegisterState extends State<LoginRegister> {
             Container(
               //images
               margin: const EdgeInsets.symmetric(vertical: 60),
-              color: AppColor.lightGrey,
               width: 100,
               height: 100,
+              decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image:AssetImage('images/app_icon.png'),
+                  )
+              ),
             ),
             CustomTextField(
               icon: Icons.phone_android_outlined,
               hintText: '電話號碼',
               controller: phoneNumberController,
+              isNumblerOnly: true,
             ),
             CustomTextField(
               icon: Icons.lock_outline,
@@ -73,7 +79,12 @@ class _LoginRegisterState extends State<LoginRegister> {
                 ),
               ),
               onTap: () {
-                Navigator.pushNamed(context, '/register_phone');
+                Navigator.pushNamed(context, '/register_phone').then((value){
+                  var userModel = context.read<UserModel>();
+                  if(userModel.user != null){
+                    Navigator.pop(context);
+                  }
+                });
               },
             ),
             const Divider(
@@ -90,10 +101,7 @@ class _LoginRegisterState extends State<LoginRegister> {
                       elevation: 0
                   ),
                   onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegisterSocial()),
-                    );
+                    _lineSignIn(context);
                   },
                   child: Container(
                     height: 46,
@@ -109,7 +117,6 @@ class _LoginRegisterState extends State<LoginRegister> {
                         )),
                         Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
                         Expanded(flex:1, child:Container()),
-
                       ],
                     ),
                   )),
@@ -137,14 +144,14 @@ class _LoginRegisterState extends State<LoginRegister> {
       Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
       if(map['token']!=null){
         String token = map['token'];
+        print('server token $token');
 
         User? user = await _getUserData(token);
-        user!.token = token;
-        user.loginMethod = LoginMethod.phone;
 
         // notifi user_model
         var userModel = context.read<UserModel>();
-        userModel.setUser(user);
+        userModel.setUser(user!);
+        userModel.token = token;
 
         Navigator.pop(context, 'ok');
 
@@ -162,86 +169,76 @@ class _LoginRegisterState extends State<LoginRegister> {
     }
   }
 
-  // Future<void> _lineSignIn(BuildContext context) async {
-  //   try {
-  //     final result = await LineSDK.instance.login();
-  //
-  //     String lineId = result.userProfile.userId;
-  //     String displayName = result.userProfile.displayName;
-  //     String email = '${lineId}@line.com';
-  //     String token = await _getUserToken(email, lineId, LoginMethod.line_id);
-  //
-  //     if(token != null){
-  //       User user = await _getUserData(token);
-  //       user.token = token;
-  //       user.loginMethod = LoginMethod.line_id;
-  //       user.socialId =lineId;
-  //
-  //       // save to sharePreference
-  //       // UserUtil.saveLoginInfo(user);
-  //
-  //       // notifi user_model
-  //       var userModel = context.read<UserModel>();
-  //       userModel.setUser(user);
-  //
-  //       Navigator.pop(context);
-  //     }else{
-  //       User user = User(email: email, name: displayName, loginMethod: LoginMethod.line_id, socialId: lineId);
-  //
-  //       final result = await Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => RegisterSocial(user: user),
-  //           )
-  //       );
-  //
-  //       if(result!=null && result=='ok'){
-  //         Navigator.pop(context, 'ok');
-  //       }else{
-  //         ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(SnackBar(content: Text('未成功建立使用者！')));
-  //       }
-  //     }
-  //   } on PlatformException catch (e) {
-  //     print(e.toString());
-  //   }
-  // }
+  Future<void> _lineSignIn(BuildContext context) async {
+    try {
+      final result = await LineSDK.instance.login();
 
-  // Future<String?> _getUserToken(String phone, String socialId, var loginMethod) async {
-  //   String path = Service.PATH_USER_TOKEN;
-  //   try {
-  //     Map queryParameters = {
-  //       'phone': phone,
-  //       'password': '000000',
-  //     };
-  //
-  //     switch(loginMethod){
-  //
-  //       case LoginMethod.lineID:
-  //         queryParameters['line_id'] = socialId;
-  //         break;
-  //     }
-  //
-  //     final response = await http.post(
-  //         Service.standard(path: path),
-  //         headers: <String, String>{
-  //           'Content-Type': 'application/json; charset=UTF-8',
-  //         },
-  //         body: jsonEncode(queryParameters)
-  //     );
-  //
-  //     Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
-  //     if(map['token']!=null){
-  //       String token = map['token'];
-  //       return token;
-  //     }else{
-  //       print(response.body);
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
+      String lineId = result.userProfile!.userId;
+      String displayName = result.userProfile!.displayName;
+
+      String? token = await _getUserTokenFromLine(lineId);
+
+      if(token != null){
+        User? user = await _getUserData(token);
+
+        // notifi user_model
+        var userModel = context.read<UserModel>();
+        userModel.setUser(user!);
+        userModel.token = token;
+        userModel.isLineLogin = true;
+
+        Navigator.pop(context);
+      }else{
+
+        await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RegisterIdentitySocial(displayName: displayName, lineId: lineId),
+            )
+        );
+
+        var userModel = context.read<UserModel>();
+        if(userModel.user != null){
+          Navigator.pop(context, 'ok');
+        }else{
+          ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('未成功建立使用者！')));
+        }
+      }
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<String?> _getUserTokenFromLine(String lineId) async {
+    String path = Service.PATH_USER_TOKEN;
+    try {
+      Map queryParameters = {
+        'phone': '00000',
+        'password': '00000',
+        'line_id': lineId,
+      };
+
+      final response = await http.post(
+          Service.standard(path: path),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(queryParameters)
+      );
+
+      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+      if(map['token']!=null){
+        String token = map['token'];
+        return token;
+      }else{
+        print(response.body);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
 
   Future<User?> _getUserData(String token) async {
     String path = Service.PATH_USER_DATA;
@@ -253,16 +250,13 @@ class _LoginRegisterState extends State<LoginRegister> {
           'Authorization': 'Token $token',
         },
       );
-      print('here');
-      print(token);
+
+      print(response.body);
 
       Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
-      String phone = map['phone'];
-      String name = map['name'];
-      bool isOwner = map['isOwner'];
-      bool isGottenLineId = map['is_gotten_line_id'];
+      User theUser = User.fromJson(map);
 
-      return User(phone: phone, name: name, isGottenLineId: isGottenLineId,isOwner: isOwner, token: token);
+      return theUser;
 
     } catch (e) {
       print(e);
@@ -271,6 +265,7 @@ class _LoginRegisterState extends State<LoginRegister> {
       // return User(phone: '0000000000', name: 'test test', isGottenLineId: false, token: '4b36f687579602c485093c868b6f2d8f24be74e2',isOwner: false);
 
     }
+    return null;
   }
 
 

@@ -1,23 +1,21 @@
-
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'register_phone_verification_code.dart';
 
 
-class RegisterPhone extends StatefulWidget {
-  const RegisterPhone({Key? key}) : super(key: key);
+class RegisterSocial extends StatefulWidget {
+  const RegisterSocial({Key? key}) : super(key: key);
 
   @override
-  _RegisterPhoneState createState() => _RegisterPhoneState();
+  _RegisterSocialState createState() => _RegisterSocialState();
 }
 
-class _RegisterPhoneState extends State<RegisterPhone> {
+class _RegisterSocialState extends State<RegisterSocial> {
 
   TextEditingController phoneNumberController = TextEditingController();
-  TextEditingController pwdTextController = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
 
 
   @override
@@ -29,21 +27,22 @@ class _RegisterPhoneState extends State<RegisterPhone> {
         ),
         body: Column(
           children: [
-            SizedBox(height: 60,),
+            const SizedBox(height: 60,),
+            CustomTextField(
+              icon: Icons.person,
+              hintText: '使用者名稱',
+              controller: userNameController,
+            ),
             CustomTextField(
               icon: Icons.phone_android_outlined,
-              hintText: '電話號碼',
+              hintText: '電話',
               controller: phoneNumberController,
             ),
-
             CustomElevatedButton(
-              title: '取得驗證碼',
+              title: '註冊',
               color: AppColor.yellow,
               onPressed: (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegisterPhoneVerificationCode()),
-                );
+
               },
             ),
           ],

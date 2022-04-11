@@ -7,8 +7,9 @@ class CustomTextField extends StatelessWidget {
   String hintText;
   TextEditingController controller;
   bool isObscureText;
+  bool isNumblerOnly;
 
-  CustomTextField({required this.icon, required this.hintText,required this.controller,this.isObscureText = false});
+  CustomTextField({required this.icon, required this.hintText,required this.controller,this.isObscureText = false, this.isNumblerOnly = false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,21 @@ class CustomTextField extends StatelessWidget {
             size: 26.0,
             color: AppColor.grey,
           ),
-          title: TextField(
+          title:
+          (isNumblerOnly)?
+          TextField(
+            controller: controller,
+            obscureText: isObscureText,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              hintText: hintText,
+              focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey,)
+              ),
+            ),
+          )
+              :
+          TextField(
             controller: controller,
             obscureText: isObscureText,
             decoration: InputDecoration(
@@ -28,7 +43,6 @@ class CustomTextField extends StatelessWidget {
               focusedBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey,)
               ),
-
             ),
           )
       ),

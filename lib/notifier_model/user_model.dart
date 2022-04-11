@@ -8,6 +8,9 @@ class UserModel extends ChangeNotifier {
   User? _user;
   User? get user => _user;
   // bool isNeedReloadIndexAndFilterCondition = false;
+  String? token;
+  bool isLineLogin = false;
+
 
   void setUser(User theUser){
     _user = theUser;
@@ -17,11 +20,8 @@ class UserModel extends ChangeNotifier {
 
   void removeUser(BuildContext context){
     _user = null;
-    // isNeedReloadIndexAndFilterCondition = true;
-
-    // var likeStockModel = context.read<LikeStockModel>();
-    // likeStockModel.stockLists.clear();
-    // likeStockModel.allLikeStocks.clear();
+    isLineLogin = false;
+    token = null;
 
     notifyListeners();
   }
@@ -32,24 +32,6 @@ class UserModel extends ChangeNotifier {
     }else{
       return false;
     }
-  }
-
-  bool isSocialLogin(){
-    if(_user?.loginMethod != LoginMethod.phone && _user?.loginMethod != null){
-      return true;
-    }else{
-      return false;
-    }
-  }
-
-  String loginMethod(){
-    switch(_user?.loginMethod){
-      case LoginMethod.phone:
-        return 'Phone';
-      case LoginMethod.lineID:
-        return 'Line';
-    }
-    return '';
   }
 
   void updateLineStatus(){

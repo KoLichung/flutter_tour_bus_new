@@ -74,7 +74,7 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
     String path = Service.ORDERS;
     try {
       final response = await http.get(Service.standard(path: path),
-          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Authorization': 'token ${userModel.user?.token}'},
+          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Authorization': 'token ${userModel.token!}'},
       );
 
       if (response.statusCode == 200) {

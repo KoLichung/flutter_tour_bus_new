@@ -1,15 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_tour_bus_new/pages/member/buses/drivers_bus_detail.dart';
 import 'firebase_options.dart';
+import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_tour_bus_new/pages/member/drivers_booking_detail.dart';
-import 'package:flutter_tour_bus_new/pages/member/drivers_booking_list.dart';
-import 'package:flutter_tour_bus_new/pages/member/drivers_bus_detail.dart';
-import 'package:flutter_tour_bus_new/pages/member/edit_bus_profile.dart';
-import 'package:flutter_tour_bus_new/pages/member/edit_user_profile.dart';
+import 'package:flutter_tour_bus_new/pages/member/bookings/drivers_booking_detail.dart';
+import 'package:flutter_tour_bus_new/pages/member/bookings/drivers_booking_list.dart';
+import 'package:flutter_tour_bus_new/pages/member/buses/edit_bus_profile.dart';
+import 'package:flutter_tour_bus_new/pages/member/editUser/edit_user_profile.dart';
 import 'package:flutter_tour_bus_new/pages/booking/inquiry_form.dart';
 import 'package:flutter_tour_bus_new/pages/member/inquiry_notice.dart';
 import 'pages/member/login_register.dart';
@@ -22,11 +24,11 @@ import 'pages/price_list_page.dart';
 import 'pages/member/member_page.dart';
 import 'pages/booking/search_list.dart';
 import 'pages/booking/rental_bus_detail.dart';
-import 'pages/member/register_phone.dart';
+import 'pages/member/register/register_phone.dart';
 import 'pages/member/inquiry_notice.dart';
 import 'pages/member/passenger_order_list.dart';
-import 'pages/member/drivers_bus_list.dart';
-import 'pages/member/add_new_bus.dart';
+import 'pages/member/buses/drivers_bus_list.dart';
+import 'pages/member/buses/add_new_bus.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
 
@@ -49,8 +51,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  LineSDK.instance.setup('1657037223').then((_) {
+    print('LineSDK Prepared');
+  });
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(
@@ -158,6 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    Intl.defaultLocale = "zh_TW";   //sets global,
 
     if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS) {
       getAPNSToken();

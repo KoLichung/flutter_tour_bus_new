@@ -1,7 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import '../../models/city.dart';
 import '../../widgets/custom_elevated_button.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
@@ -17,33 +16,27 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  List<String> cityList = ['基隆','台北','新北市','桃園','新竹','苗栗','台中','彰化','雲林','南投', '嘉義','台南','高雄','屏東','宜蘭','花蓮','台東'];
+  // List<String> cityList = ['基隆','台北','新北市','桃園','新竹','苗栗','台中','彰化','雲林','南投', '嘉義','台南','高雄','屏東','宜蘭','花蓮','台東'];
 
-  String fromCity = '台北';
-  String toCity = '台中';
+  List<String> cityList = City.getCityNames();
 
-  String startDate = DateFormat("MM/dd EEE").format(DateTime.now().add(const Duration(days: 14)));
-  String endDate = DateFormat("MM/dd EEE").format(DateTime.now().add(const Duration(days: 17)));
+  String fromCity = '台北市';
+  String toCity = '台中市';
+
+  String? startDate;
+  String? endDate;
 
   TextEditingController numberOfPeople = TextEditingController();
-
-  static const MethodChannel methodChannel = MethodChannel('samples.flutter.io/battery');
-
-  // Future<void> _getBatteryLevel() async {
-  //   String batteryLevel;
-  //   try {
-  //     final int? result = await methodChannel.invokeMethod('getBatteryLevel');
-  //     batteryLevel = 'Battery level: $result%.';
-  //   } on PlatformException {
-  //     batteryLevel = 'Failed to get battery level.';
-  //   }
-  //   print(batteryLevel);
-  // }
 
   @override
   void initState() {
     super.initState();
     // _getBatteryLevel();
+
+    var now = DateTime.now();
+    var formatter = DateFormat("MM/dd EEE");
+    startDate = formatter.format(now.add(const Duration(days: 14)));
+    endDate = formatter.format(now.add(const Duration(days: 17)));
   }
 
   @override
@@ -224,6 +217,7 @@ class _HomePageState extends State<HomePage> {
   getNumberOfPeople(){
     return TextFormField(
       controller: numberOfPeople,
+      keyboardType: TextInputType.number,
       decoration: const InputDecoration(
         border: InputBorder.none,
         // isDense: true,

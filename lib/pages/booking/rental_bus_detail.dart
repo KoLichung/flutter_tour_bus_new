@@ -118,13 +118,13 @@ class _RentalBusDetailState extends State<RentalBusDetail> {
               child: Column(/**/
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.theBusDetail.title,style: Theme.of(context).textTheme.subtitle2,),
+                  Text(widget.theBusDetail.title!,style: Theme.of(context).textTheme.subtitle2,),
                   Text('旅遊公司名待改',style: const TextStyle(color: Colors.grey),),
-                  Text('地址：'+ widget.theBusDetail.city),
+                  Text('地址：'+ widget.theBusDetail.city!),
                   Row(children: [
                     Text('年份：年份待改'),
                     const SizedBox(width: 20,),
-                    Text('座位：${widget.theBusDetail.vehicleSeats} 人'),
+                    Text('座位：${widget.theBusDetail.vehicalSeats} 人'),
                   ],),
                 ],
               ),

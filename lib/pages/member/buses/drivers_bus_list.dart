@@ -70,7 +70,7 @@ class _DriversBusListState extends State<DriversBusList> {
                             color: Colors.red,
                           image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),fit:BoxFit.fill),
                           ),),
-                        title: Text(driversBusList[i].title),
+                        title: Text(driversBusList[i].title!),
                         subtitle: Text('最近出租日： \n日期待改~日期待改'),
                         onTap: (){
                           Navigator.pushNamed(context, '/drivers_bus_detail');
@@ -89,7 +89,7 @@ class _DriversBusListState extends State<DriversBusList> {
     String path = Service.BUSSES;
     try {
       final response = await http.get(Service.standard(path: path),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Authorization': 'token ${userModel.user?.token}'},
+        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Authorization': 'token ${userModel.token}'},
       );
 
       if (response.statusCode == 200) {

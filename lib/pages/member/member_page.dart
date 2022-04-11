@@ -30,7 +30,7 @@ class _MemberPageState extends State<MemberPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('狀態： 已登入(${userModel.loginMethod()})', style: const TextStyle(fontSize: 14)),
+                        const Text('狀態： 已登入', style: TextStyle(fontSize: 14)),
                         Text('名稱：${userModel.user?.name}', style: const TextStyle(fontSize: 20),),
                         Text('電話：${userModel.user?.phone}', style: const TextStyle(fontSize: 20),),
                       ],

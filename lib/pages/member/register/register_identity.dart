@@ -1,10 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tour_bus_new/constant.dart';
+import 'package:provider/provider.dart';
+
+import '../../../models/user.dart';
+import 'package:http/http.dart' as http;
+
+import '../../../notifier_model/user_model.dart';
 
 class RegisterIdentity extends StatefulWidget {
-  const RegisterIdentity({Key? key}) : super(key: key);
+  final String phone;
+
+  const RegisterIdentity({Key? key, required this.phone}) : super(key: key);
 
   @override
   _RegisterIdentityState createState() => _RegisterIdentityState();
@@ -14,7 +25,6 @@ enum UserIdentity { passenger, driver }
 
 class _RegisterIdentityState extends State<RegisterIdentity> {
 
-  TextEditingController phoneNumberController = TextEditingController();
   TextEditingController userNameController = TextEditingController();
   TextEditingController pwdTextController = TextEditingController();
 
@@ -32,16 +42,24 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
           child: Column(
             children: [
               const SizedBox(height: 40,),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.phone_android_outlined,
+                    size: 26.0,
+                    color: AppColor.grey,
+                  ),
+                  title: Text(
+                    widget.phone,
+                  ),
+                ),
+              ),
               chooseIdentity(),
               CustomTextField(
                 icon: Icons.person,
                 hintText: '使用者名稱',
                 controller: userNameController,
-              ),
-              CustomTextField(
-                icon: Icons.phone_android_outlined,
-                hintText: '電話',
-                controller: phoneNumberController,
               ),
               CustomTextField(
                 icon: Icons.lock_outline,
@@ -54,10 +72,12 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
                 title: '註冊',
                 color: AppColor.yellow,
                 onPressed: (){
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const RegisterPhoneVerificationCode()),
-                  // );
+                  // Navigator.popUntil(context, ModalRoute.withName('/login_register'));
+
+                  if(_userIdentity == UserIdentity.passenger){
+                    User user = User(name: userNameController.text, phone: widget.phone);
+                    _postCreateUser(user, pwdTextController.text);
+                  }
                 },
               ),
               const SizedBox(height: 20,),
@@ -68,7 +88,7 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
 
   chooseIdentity(){
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+      margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 0),
       child: Row(
         children: [
           Radio<UserIdentity>(
@@ -210,7 +230,38 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
     );
   }
 
+  Future _postCreateUser(User user, String password) async {
+    String path = Service.PATH_CREATE_USER;
 
+    try {
+      Map queryParameters = {
+        'phone': user.phone,
+        'name': user.name,
+        'password': password,
+      };
+
+      final response = await http.post(
+          Service.standard(path: path),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(queryParameters)
+      );
+
+      // print(response.body);
+
+      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+      User theUser = User.fromJson(map);
+
+      var userModel = context.read<UserModel>();
+      userModel.setUser(theUser);
+
+      Navigator.popUntil(context, ModalRoute.withName('/login_register'));
+    } catch (e) {
+      print(e);
+      return "error";
+    }
+  }
 
 
 }

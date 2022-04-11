@@ -79,30 +79,30 @@ class _SearchListState extends State<SearchList> {
                       decoration: BoxDecoration(
                           image: DecorationImage(image: AssetImage('images/tour_bus.jpeg'),fit: BoxFit.fill)),
                     ),
-                    title: Text(busResult[i].title, style: Theme.of(context).textTheme.subtitle2,),
+                    title: Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
                     subtitle:RichText(
-                      text: TextSpan(text: busResult[i].vehicleBodyNumber,
+                      text: TextSpan(text: busResult[i].vehicalBodyNumber,
                         style:const TextStyle(color: AppColor.grey),
                         children: <TextSpan>[
-                          TextSpan(text: '\n所在地：${busResult[i].city}\n年份：2022  座位：${busResult[i].vehicleSeats}',
+                          TextSpan(text: '\n所在地：${busResult[i].city}\n年份：2022  座位：${busResult[i].vehicalSeats}',
                             style: Theme.of(context).textTheme.bodyText2,),
                         ],
                       ),),
                     onTap: (){
                       Bus theBus = busResult[i];
                       Bus busDetail = Bus(
-                          // id: theBus.id,
+                          id: theBus.id,
                           title: theBus.title,
                           lat: theBus.lat,
                           lng: theBus.lng,
                           city: theBus.city,
                           county: theBus.county,
-                          vehicleSeats: theBus.vehicleSeats,
-                          vehicleLicence: theBus.vehicleLicence,
-                          vehicleOwner: theBus.vehicleOwner,
-                          vehicleEngineNumber: theBus.vehicleEngineNumber,
-                          vehicleBodyNumber: theBus.vehicleBodyNumber,
-                          vehicleLicenceImage: theBus.vehicleLicenceImage,
+                          vehicalSeats: theBus.vehicalSeats,
+                          vehicalLicence: theBus.vehicalLicence,
+                          vehicalOwner: theBus.vehicalOwner,
+                          vehicalEngineNumber: theBus.vehicalEngineNumber,
+                          vehicalBodyNumber: theBus.vehicalBodyNumber,
+                          vehicalLicenceImage: theBus.vehicalLicenceImage,
                           isPublish: theBus.isPublish,
                           user: theBus.user);
 
@@ -160,15 +160,6 @@ class _SearchListState extends State<SearchList> {
         'startDate':'20220309',
         'endtDate':'20220310',
         'numberOfPeople':'25'
-        // stock_codes=2330&stock_percent=100&start_date=2007-01-01&end_date=2020-03-01&is_compare_0050=true&is_reinvest_divident=true&month_cash_flow=1000&start_money=10000
-        // 'stock_codes': widget.theTestingValues.stockCodes,
-        // 'stock_percent': widget.theTestingValues.stockPercent,
-        // 'start_date': widget.theTestingValues.startDate,
-        // 'end_date': widget.theTestingValues.endDate,
-        // 'is_compare_0050': widget.theTestingValues.isCompare0050,
-        // 'is_reinvest_divident': widget.theTestingValues.isReinvestDivident,
-        // 'month_cash_flow': widget.theTestingValues.monthCashFlow,
-        // 'start_money': widget.theTestingValues.startMoney,
       }));
       // print(response.body);
 
