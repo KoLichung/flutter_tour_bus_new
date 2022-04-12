@@ -18,6 +18,7 @@ class Service{
 
   static const PATH_GET_SMS_VERIFY = '/api/sms_verify';
 
+  static const PATH_MEDIA = '/media/';
 
   static Uri standard({String? path, Map<String, String>? queryParameters}) {
     print(Uri.http(_HOST, '$path', queryParameters));

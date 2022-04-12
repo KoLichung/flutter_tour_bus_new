@@ -122,7 +122,6 @@ class MyApp extends StatelessWidget {
         '/payment_confirmed': (context) => const PaymentConfirmed(),
         '/bus_list': (context) => const DriversBusList(),
         '/add_new_bus': (context) => const AddNewBus(),
-        '/drivers_bus_detail': (context) => const DriversBusDetail(),
         '/edit_bus_profile': (context) => const EditBusProfile(),
         '/drivers_booking_list': (context) => const DriversBookingList(),
         '/drivers_booking_detail': (context) => const DriversBookingDetail(),

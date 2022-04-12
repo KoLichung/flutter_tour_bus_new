@@ -1,9 +1,19 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/models/tour_bus_image.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_big_outlined_button.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_tour_bus_new/constant.dart';
+import '../../../notifier_model/user_model.dart';
+import 'package:http/http.dart' as http;
 
 class DriversBusDetail extends StatefulWidget {
-  const DriversBusDetail({Key? key}) : super(key: key);
+
+  final int busId;
+
+  const DriversBusDetail({Key? key, required this.busId}) : super(key: key);
 
   @override
   State<DriversBusDetail> createState() => _DriversBusDetailState();
@@ -18,8 +28,19 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
 
   List<String> fakeDate = ['2022-01-10~2022-01-16','2022-01-17~2022-01-31','2022-02-06~2022-02-19','2022-03-15~2022-03-26'];
 
+  List<TourBusImage> listBusImages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    var userModel = context.read<UserModel>();
+    _fetchBusImages(userModel.token!, widget.busId);
+  }
+
   @override
   Widget build(BuildContext context) {
+    var userModel = context.read<UserModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('車輛詳細'),
@@ -39,68 +60,81 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
             children: [
               SizedBox(
                 height: 110,
-                child: ListView(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                      width: 100,
-                      height: 100,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                    ),
-                  ],
-                ),
+                child:
+                ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: listBusImages.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        margin: const EdgeInsets.fromLTRB(10,10,0,8),
+                        height: 100, width: 100,
+                        child: Image.network(listBusImages[index].image!,fit: BoxFit.cover,),
+                      );
+                    }
+                )
+                // ListView(
+                //   shrinkWrap: true,
+                //   scrollDirection: Axis.horizontal,
+                //   children: [
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //     Container(
+                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
+                //       width: 100,
+                //       height: 100,
+                //       decoration: const BoxDecoration(
+                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
+                //             fit:BoxFit.fill),),
+                //     ),
+                //   ],
+                // ),
               ),
 
               Align(
@@ -125,6 +159,7 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
               ),
               ListView.builder(
                 padding: const EdgeInsets.only(bottom: 6),
+                physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 itemCount: fakeDate.length,
@@ -156,6 +191,7 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
               ListView.builder(
                 padding: const EdgeInsets.only(bottom: 6),
                 scrollDirection: Axis.vertical,
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: fakeDate.length,
                 itemBuilder: (context, index) {
@@ -171,6 +207,7 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
               ListView.builder(
                 padding: const EdgeInsets.only(bottom: 6),
                 scrollDirection: Axis.vertical,
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: fakeDate.length,
                 itemBuilder: (context, index) {
@@ -185,6 +222,30 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
         ),
       ),
     );
+  }
+
+  Future _fetchBusImages(String token, int busId) async {
+
+    String path = Service.TOUR_BUS_IMAGES;
+    try {
+
+      final queryParameters = {
+        "bus_id" : busId.toString(),
+      };
+
+      final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        List body = json.decode(utf8.decode(response.body.runes.toList()));
+        listBusImages = body.map((value) => TourBusImage.fromJson(value)).toList();
+
+        setState(() {});
+
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 }
 

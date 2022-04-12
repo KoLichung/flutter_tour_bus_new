@@ -55,7 +55,20 @@ class _AddNewBusState extends State<AddNewBus> {
         appBar: AppBar(
           title: const Text('新增汽車'),
         ),
-        body: SingleChildScrollView(
+        body:  (isLoading)?
+            Center(
+              child:Column(
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  SizedBox(height: 40),
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text("資料上傳中，請稍候..."),
+                ],
+              ),
+            )
+        :
+        SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -226,12 +239,12 @@ class _AddNewBusState extends State<AddNewBus> {
                     theBus.vehicalBodyNumber = bodyNumController.text;
 
                     _postCreateNewCar(theBus, userModel.token!);
+
+                    isLoading = true;
+                    setState(() {});
                   }else{
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("各項資料不可空白！"),));
                   }
-
-                  // _uploadImage(licenseImage);
-                  // uploadImage();
 
                 },
               ),
@@ -365,6 +378,9 @@ class _AddNewBusState extends State<AddNewBus> {
       request.fields['type'] = 'exterior';
       var response = await request.send();
       print(response.statusCode);
+      if(response.statusCode!= 201 && response.statusCode!= 200){
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("此圖片上傳失敗，可能檔案太大！"),));
+      }
     }
 
     for (XFile image in interiorImageList){
@@ -375,6 +391,9 @@ class _AddNewBusState extends State<AddNewBus> {
       request.fields['type'] = 'interior';
       var response = await request.send();
       print(response.statusCode);
+      if(response.statusCode!= 201 && response.statusCode!= 200){
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("此圖片上傳失敗，可能檔案太大！"),));
+      }
     }
 
     var request = http.MultipartRequest('POST', Service.standard(path: path));
@@ -384,8 +403,12 @@ class _AddNewBusState extends State<AddNewBus> {
     request.fields['type'] = 'luggage';
     var response = await request.send();
     print(response.statusCode);
+    if(response.statusCode!= 201 && response.statusCode!= 200){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("此圖片上傳失敗，可能檔案太大！"),));
+    }
 
-
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("成功更新！"),));
+    Navigator.pop(context);
   }
 
   Future _uploadLicenceImage(XFile? image, String token, int busId)async{
@@ -412,7 +435,7 @@ class _AddNewBusState extends State<AddNewBus> {
       print(value);
       Map<String, dynamic> map = json.decode(value);
       if(map['title']!=null){
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("成功更新！"),));
+        // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("成功更新！"),));
         // Navigator.pop(context);
         _uploadImageList(busId);
       }else{

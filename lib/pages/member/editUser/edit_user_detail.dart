@@ -61,14 +61,18 @@ class _EditUserDetailState extends State<EditUserDetail> {
       _userIdentity = UserIdentity.driver;
       driverFormIsVisible = true;
 
-      companyTextController.text = theUser!.company!;
-      companyAddressTextController.text = theUser!.address!;
-      vehicalLicenceTextController.text = theUser!.vehicalLicence!;
-      vehicalOwnerTextController.text = theUser!.vehicalOwner!;
-      vehicalEngineNumberTextController.text = theUser!.vehicalEngineNumber!;
-      vehicalBodyNumberTextController.text = theUser!.vehicalBodyNumber!;
+      try{
+        companyTextController.text = theUser!.company!;
+        companyAddressTextController.text = theUser!.address!;
+        vehicalLicenceTextController.text = theUser!.vehicalLicence!;
+        vehicalOwnerTextController.text = theUser!.vehicalOwner!;
+        vehicalEngineNumberTextController.text = theUser!.vehicalEngineNumber!;
+        vehicalBodyNumberTextController.text = theUser!.vehicalBodyNumber!;
 
-      currentImageUrl = theUser!.vehicalLicenceImage;
+        currentImageUrl = theUser!.vehicalLicenceImage;
+      }catch(e){
+        print(e);
+      }
     }
   }
 
