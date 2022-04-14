@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
 import '../../models/city.dart';
 import '../../widgets/custom_elevated_button.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:intl/intl.dart';
 import 'search_list.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -23,24 +26,27 @@ class _HomePageState extends State<HomePage> {
   String fromCity = '台北市';
   String toCity = '台中市';
 
-  String? startDate;
-  String? endDate;
+  TextEditingController numberOfPeopleController = TextEditingController();
 
-  TextEditingController numberOfPeople = TextEditingController();
+  final DateRangePickerController _dateRangePickerController = DateRangePickerController();
+
+  String _startDate = DateFormat('MM / dd EEE').format(DateTime.now().add(const Duration(days: 14)));
+  String _endDate = DateFormat('MM / dd EEE').format(DateTime.now().add(const Duration(days: 17)));
 
   @override
   void initState() {
-    super.initState();
-    // _getBatteryLevel();
 
-    var now = DateTime.now();
-    var formatter = DateFormat("MM/dd EEE");
-    startDate = formatter.format(now.add(const Duration(days: 14)));
-    endDate = formatter.format(now.add(const Duration(days: 17)));
+    var userModel = context.read<UserModel>();
+    numberOfPeopleController.text = userModel.numberOfPeople;
+
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    var userModel = context.read<UserModel>();
+
     return Scaffold(
       appBar:AppBar(
         title: const Text('租遊覽車'),),
@@ -101,11 +107,10 @@ class _HomePageState extends State<HomePage> {
                                     return getDatePicker();
                                   });
                             },
-                            child: Text('$startDate - $endDate')),
-
+                            child: Text('${userModel.startDate}  -  ${userModel.endDate}')
+                        ),
                       ],),
                     ),
-
                     const Divider(
                       color: AppColor.yellow,
                       thickness: 2,
@@ -129,12 +134,19 @@ class _HomePageState extends State<HomePage> {
                 color: AppColor.yellow,
                 title: '開始搜尋',
                 onPressed: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SearchList(),
-                      ));
-                },)
+                  if (numberOfPeopleController.text == '') {
+                    const snackBar =SnackBar(
+                      content: Text('請輸入搭車人數！'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  } else {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchList(startDate: userModel.startDate, endDate: userModel.endDate, fromCity: userModel.fromCity, toCity: userModel.toCity, numberOfPeople: userModel.numberOfPeople,),
+                        ));
+                  }
+                },),
             ]
         ),
       ),
@@ -142,13 +154,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   DropdownButtonHideUnderline getFromCity(){
+    var userModel = context.read<UserModel>();
     return DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           itemHeight: 50,
-          value: fromCity,
+          value: userModel.fromCity,
           onChanged:(String? newValue){
             setState(() {
               fromCity = newValue!;
+              Provider.of<UserModel>(context, listen: false).changeBookingFromCity(fromCity);
             });
           },
           items: cityList.map<DropdownMenuItem<String>>((String value) {
@@ -161,13 +175,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   DropdownButtonHideUnderline getToCity(){
+    var userModel = context.read<UserModel>();
     return DropdownButtonHideUnderline(
         child: DropdownButton<String>(
             itemHeight: 50,
-            value: toCity,
+            value: userModel.toCity,
             onChanged:(String? newValue){
               setState(() {
                 toCity = newValue!;
+                Provider.of<UserModel>(context, listen: false).changeBookingToCity(toCity);
               });
             },
             items: cityList.map<DropdownMenuItem<String>>((String value) {
@@ -180,11 +196,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   getDatePicker(){
-
-    void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
-      // TODO: implement your code here
-    }
-
     return Center(
       child: SizedBox(
         height: 460,
@@ -195,36 +206,67 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Colors.white,
           ),
           child: SfDateRangePicker(
-            monthViewSettings: const DateRangePickerMonthViewSettings(firstDayOfWeek: 1),
+            controller: _dateRangePickerController,
+            view: DateRangePickerView.month,
+            monthViewSettings: const DateRangePickerMonthViewSettings(
+                firstDayOfWeek: 1,
+                ),
+            headerHeight: 60,
+            headerStyle: const DateRangePickerHeaderStyle(
+                backgroundColor: AppColor.yellow,
+                textAlign: TextAlign.center,
+                textStyle: TextStyle(
+                  fontSize: 22,
+                  letterSpacing: 3,
+                  color: Colors.white,
+                )),
             selectionMode: DateRangePickerSelectionMode.range,
+            minDate: DateTime.now(),
+            onSelectionChanged: selectionChanged,
             showActionButtons: true,
             cancelText: '取消',
             confirmText: '確定',
-            onSubmit: (Object? value) {
-              print('value $value');
+            onSubmit: (Object? value, ) {
+              // print('chosen duration: $value');
               Navigator.pop(context);
             },
             onCancel: () {
               Navigator.pop(context);
             },
-
           ),
         ),
       ),
     );
   }
 
+  void selectionChanged(DateRangePickerSelectionChangedArgs args) {
+    setState(() {
+      _startDate =
+          DateFormat('MM / dd EEE').format(args.value.startDate).toString();
+      _endDate =
+          DateFormat('MM / dd EEE').format(args.value.endDate ?? args.value.startDate).toString();
+      Provider.of<UserModel>(context, listen: false).changeBookingStartDate(_startDate);
+      Provider.of<UserModel>(context, listen: false).changeBookingEndDate(_endDate);
+    });
+  }
+
+
   getNumberOfPeople(){
     return TextFormField(
-      controller: numberOfPeople,
+      controller: numberOfPeopleController,
       keyboardType: TextInputType.number,
       decoration: const InputDecoration(
         border: InputBorder.none,
-        // isDense: true,
-       hintText: '10',
       ),
+      onChanged: (String? value){
+        setState(() {
+          String numberOfPeople = value!;
+          Provider.of<UserModel>(context, listen: false).changeBookingNumberOfPeople(numberOfPeople);
+        });
+      },
     );
   }
+
 
 
 }

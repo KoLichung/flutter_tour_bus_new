@@ -8,7 +8,13 @@ import 'dart:convert';
 import 'package:flutter_tour_bus_new/models/bus.dart';
 
 class SearchList extends StatefulWidget {
-  const SearchList({Key? key}) : super(key: key);
+  final String fromCity;
+  final String toCity;
+  final String startDate;
+  final String endDate;
+  final String numberOfPeople;
+
+  const SearchList({Key? key, required this.fromCity, required this.toCity, required this.startDate, required this.endDate, required this.numberOfPeople}) : super(key: key);
 
   @override
   _SearchListState createState() => _SearchListState();

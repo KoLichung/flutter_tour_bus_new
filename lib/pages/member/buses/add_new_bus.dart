@@ -13,11 +13,9 @@ import 'package:flutter_tour_bus_new/models/order.dart';
 import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tour_bus_new/models/bus.dart';
-
+import 'add_new_bus_delete_photo_dialog.dart';
 import '../../../models/city.dart';
 import '../../../models/county.dart';
-
-
 
 class AddNewBus extends StatefulWidget {
   const AddNewBus({Key? key}) : super(key: key);
@@ -88,10 +86,10 @@ class _AddNewBusState extends State<AddNewBus> {
                     getLocationDistrict()
                 ],),
               ),
+              imageUploadButtonTitle('上傳行照：'),
               Row(
                 children: [
                   ImageUploadButton(
-                      title: '上傳行照：',
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
                         final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -103,16 +101,46 @@ class _AddNewBusState extends State<AddNewBus> {
                         setState(() {});
 
                       }),
-                  licenseImage == null ? SizedBox() : Container(
-                    margin: const EdgeInsets.fromLTRB(0,30,0,8),
-                    height: 60, width: 60,
-                    child: Image.file(File(licenseImage!.path),fit: BoxFit.cover,),
+                  licenseImage == null ? SizedBox() : Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(0,6,0,6),
+                        height: 60, width: 60,
+                        child: Image.file(File(licenseImage!.path),fit: BoxFit.cover,)),
+                      Positioned(
+                        top: 8,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () async {
+                            var data = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AddNewBusDeletePhotoDialog();
+                                });
+                            if (data == 'confirmDelete'){
+                              setState(() {
+                                licenseImage = null;
+                              });
+                            }
+                          },
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            child: const Icon(Icons.clear, size: 14,color: Colors.white,),
+                            decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red),
+                          ),
+                        ),
+                      )
+                    ]
                   ),],),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              imageUploadButtonTitle('外觀照片(1~5張)：'),
+              Row(
                 children: [
                   ImageUploadButton(
-                      title: '外觀照片(1~5張)：',
+
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
                         final List<XFile>? pickedFile = await _picker.pickMultiImage(
@@ -132,33 +160,65 @@ class _AddNewBusState extends State<AddNewBus> {
                         setState(() {});
 
                       }),
-                  outLookImageList.isEmpty ? SizedBox() : Container(
-                    margin: const EdgeInsets.fromLTRB(30,0,0,0),
-                    height: 60,
-                    // width: 200,
+                  outLookImageList.isEmpty ? SizedBox() : Expanded(
                     child:
-                      ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: outLookImageList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              margin: EdgeInsets.only(right: 5),
-                              child: Image.file(File(outLookImageList[index].path),
-                                fit: BoxFit.cover,
-                                width: 60,
-                              ),
-                            );
-                          }),
+                        Container(
+                          margin: const EdgeInsets.fromLTRB(0,6,0,6),
+                          height: 60,
+                          child:
+                          ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: outLookImageList.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Stack(
+                                  alignment: Alignment.topRight,
+                                  children: [
+                                    Container(
+                                      height: 60,
+                                      width: 60,
+                                      margin: const EdgeInsets.only(right: 10),
+                                      child: Image.file(File(outLookImageList[index].path),
+                                        fit: BoxFit.cover,
+                                      ),),
+                                    Positioned(
+                                      top: 2,
+                                      right: 12,
+                                      child: GestureDetector(
+                                        onTap: ()async{
+                                          var data = await showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AddNewBusDeletePhotoDialog();
+                                              });
+                                          if (data == 'confirmDelete'){
+                                            setState(() {
+                                              outLookImageList.removeAt(index);
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          width: 20,
+                                          height: 20,
+                                          child: const Icon(Icons.clear, size: 14,color: Colors.white,),
+                                          decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.red),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              }),
 
-                  ),
-                ],
+                        ),
+                  ),],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              imageUploadButtonTitle('內裝照片(1~5張)：'),
+              Row(
                 children: [
                   ImageUploadButton(
-                      title: '內裝照片(1~5張)：',
+
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
                         final List<XFile>? pickedFile = await _picker.pickMultiImage(
@@ -173,37 +233,71 @@ class _AddNewBusState extends State<AddNewBus> {
                         }
 
                         pickedFile;
-                        print('image list length' + outLookImageList.length.toString());
+                        print('image list length' + interiorImageList.length.toString());
 
                         setState(() {});
 
                       }),
-                  interiorImageList.isEmpty ? SizedBox() : Container(
-                    margin: const EdgeInsets.fromLTRB(30,0,0,0),
-                    height: 60,
-                    // width: 200,
-                    child:
-                    ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemCount: interiorImageList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Container(
-                            margin: EdgeInsets.only(right: 5),
-                            child: Image.file(File(interiorImageList[index].path),
-                              fit: BoxFit.cover,
-                              width: 60,
-                            ),
-                          );
-                        }),
+                  interiorImageList.isEmpty ? SizedBox() : Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.fromLTRB(0,6,0,6),
+                      height: 60,
+                      child:
+                      ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          itemCount: interiorImageList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Stack(
+                              alignment: Alignment.topRight,
+                              children:[
+                                Container(
+                                  margin: EdgeInsets.only(right: 10),
+                                  child: Image.file(File(interiorImageList[index].path),
+                                    fit: BoxFit.cover,
+                                    width: 60,
+                                    height: 60,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 2,
+                                  right: 12,
+                                  child: GestureDetector(
+                                    onTap: ()async{
+                                      var data = await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AddNewBusDeletePhotoDialog();
+                                          });
+                                      if (data == 'confirmDelete'){
+                                        setState(() {
+                                          interiorImageList.removeAt(index);
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      width: 20,
+                                      height: 20,
+                                      child: const Icon(Icons.clear, size: 14,color: Colors.white,),
+                                      decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Colors.red),
+                                    ),
+                                  ),
+                                )
+                              ]
+                            );
+                          }),
 
+                    ),
                   ),
                 ],
               ),
+              imageUploadButtonTitle('行李箱(1張)：'),
               Row(
                 children: [
                   ImageUploadButton(
-                      title: '行李箱(1張)：',
+
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
                         final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -215,10 +309,42 @@ class _AddNewBusState extends State<AddNewBus> {
                         setState(() {});
 
                       }),
-                  luggageImage == null ? SizedBox() : Container(
-                    margin: const EdgeInsets.fromLTRB(0,30,0,8),
-                    height: 60, width: 60,
-                    child: Image.file(File(luggageImage!.path),fit: BoxFit.cover,),
+                  luggageImage == null ? SizedBox() : Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(0,6,0,6),
+                        height: 60, width: 60,
+                        child: Image.file(File(luggageImage!.path),fit: BoxFit.cover,),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () async {
+                            var data = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AddNewBusDeletePhotoDialog();
+                                });
+                            if (data == 'confirmDelete'){
+                              setState(() {
+                                luggageImage = null;
+                              });
+                            }
+
+                          },
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            child: const Icon(Icons.clear, size: 14,color: Colors.white,),
+                            decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red),
+                          ),
+                        ),
+                      )
+                    ]
                   ),],),
               CustomElevatedButton(
                 title: '確定新增',
@@ -252,6 +378,41 @@ class _AddNewBusState extends State<AddNewBus> {
             ],
           ),
         ));
+  }
+
+  imageUploadButtonTitle(String title){
+    return Container(
+      margin: const EdgeInsets.only(left: 30),
+      alignment: Alignment.centerLeft,
+      child: Text(title),);
+  }
+
+  imageDeleteButton(){
+    return Positioned(
+      top: 8,
+      right: 2,
+      child: GestureDetector(
+        onTap: () async {
+          var data = await showDialog<Widget>(
+              context: context,
+              builder: (BuildContext context) {
+                return AddNewBusDeletePhotoDialog();
+              });
+          if (data == 'confirmDelete'){
+
+          }
+
+        },
+        child: Container(
+          width: 20,
+          height: 20,
+          child: const Icon(Icons.clear, size: 14,color: Colors.white,),
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.red),
+        ),
+      ),
+    );
   }
 
   driverInputRow(String title, TextEditingController controller, bool isNumberOnly){

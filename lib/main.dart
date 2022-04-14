@@ -109,7 +109,7 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(),
       routes:  {
         '/main': (context) => const MyHomePage(),
-        '/search_list': (context) => const SearchList(),
+        // '/search_list': (context) => const SearchList(),
         '/inquiry_form': (context) => const InquiryForm(),
         // '/bus_detail': (context) => RentalBusDetail(),
         '/login_register': (context) => const LoginRegister(),

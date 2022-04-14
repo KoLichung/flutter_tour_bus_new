@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/models/tour_bus_image.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_big_outlined_button.dart';
@@ -8,6 +8,12 @@ import 'package:provider/provider.dart';
 import 'package:flutter_tour_bus_new/constant.dart';
 import '../../../notifier_model/user_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_tour_bus_new/widgets/custom_outlined_text.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
+import 'drivers_bus_detail_delete_date_dialog.dart';
+
+import 'package:intl/intl.dart';
 
 class DriversBusDetail extends StatefulWidget {
 
@@ -30,11 +36,17 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
 
   List<TourBusImage> listBusImages = [];
 
+  String? _startDate;
+  String? _endDate;
+  final DateRangePickerController _controller = DateRangePickerController();
+
+  List<AvailableDate> availableDateList = [];
+
   @override
   void initState() {
-    super.initState();
     var userModel = context.read<UserModel>();
     _fetchBusImages(userModel.token!, widget.busId);
+    super.initState();
   }
 
   @override
@@ -145,44 +157,62 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
               Row(
                 children: [
                   const Text('設定可出租日期：'),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 6),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColor.yellow,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                  ),
-                    child: Text('新增', style: TextStyle(color: AppColor.yellow),),
-                  )]
-              ),
+                  GestureDetector(
+                    child: const CustomOutlinedText(title: '新增', color:  AppColor.yellow),
+                    onTap: (){
+                      showDialog<Widget>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return getDatePicker();
+                          });
+                    }),
+                ]),
               ListView.builder(
                 padding: const EdgeInsets.only(bottom: 6),
                 physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
-                itemCount: fakeDate.length,
+                itemCount: availableDateList.length,
                 itemBuilder: (context, index) {
-                  final date = fakeDate[index];
-                  return Dismissible(
-                      key: Key(date),
-                      onDismissed: (direction) {
-                        // Remove the item from the data source.
-                        setState(() {
-                          fakeDate.removeAt(index);
-                        });
-                        // Then show a snackbar.
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$date 已刪除')));
-                      },
-                      background: Container(color: Colors.red),
-                      child: Row(
-                        children: [
-                          Text(fakeDate[index],style: const TextStyle(height: 2),),
-                          const SizedBox(width: 10,),
-                          const Icon(Icons.remove_circle,color: Colors.red,)
-                        ],
-                      ));
+                  // final date = availableDateList[index];
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(availableDateList[index].startDate! + '~' + availableDateList[index].endDate!),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.delete_forever,color: Colors.red,),
+                          onPressed:() async {
+                            var data = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return DriversBusDetailDeleteDateDialog(availableDate: availableDateList[index],);
+                                });
+                            if (data == 'confirmDelete'){
+                              setState(() {
+                                availableDateList.removeAt(index);
+                              });
+                            }
+                          })],
+                  );
+                  // return Dismissible(
+                  //     key: Key(date),
+                  //     onDismissed: (direction) {
+                  //       // Remove the item from the data source.
+                  //       setState(() {
+                  //         availableDates.removeAt(index);
+                  //       });
+                  //       // Then show a snackbar.
+                  //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$date 已刪除')));
+                  //     },
+                  //     background: Container(color: Colors.red),
+                  //     child: Row(
+                  //       children: [
+                  //         Text(availableDates[index],style: const TextStyle(height: 2),),
+                  //         const SizedBox(width: 10,),
+                  //         const Icon(Icons.remove_circle,color: Colors.red,)
+                  //       ],
+                  //     ));
                 },
               ),
               const Align(
@@ -224,6 +254,64 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
     );
   }
 
+  getDatePicker(){
+    return Center(
+      child: SizedBox(
+        height: 460,
+        width: 360,
+        child: SfDateRangePickerTheme(
+          data: SfDateRangePickerThemeData(
+            brightness: Brightness.light,
+            backgroundColor: Colors.white,
+          ),
+          child: SfDateRangePicker(
+            controller: _controller,
+            view: DateRangePickerView.month,
+            monthViewSettings: const DateRangePickerMonthViewSettings(
+              firstDayOfWeek: 1,
+            ),
+            headerHeight: 60,
+            headerStyle: const DateRangePickerHeaderStyle(
+                backgroundColor: AppColor.yellow,
+                textAlign: TextAlign.center,
+                textStyle: TextStyle(
+                  fontSize: 22,
+                  letterSpacing: 3,
+                  color: Colors.white,
+                )),
+            selectionMode: DateRangePickerSelectionMode.range,
+            minDate: DateTime.now(),
+            onSelectionChanged: selectionChanged,
+            showActionButtons: true,
+            cancelText: '取消',
+            confirmText: '確定',
+            onSubmit: (Object? value, ) {
+              setState(() {
+                AvailableDate availableDate = AvailableDate(startDate: _startDate, endDate: _endDate);
+                availableDateList.add(availableDate);
+              });
+              Navigator.pop(context);
+            },
+            onCancel: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void selectionChanged(DateRangePickerSelectionChangedArgs args) {
+    // on selectionChanged 這裏僅是先記錄選取的 date
+    // 直到按下確定 submit 才需要存進資料裡
+      if(args.value.startDate != null && args.value.endDate != null ){
+        _startDate = DateFormat('yyyy-MM-dd').format(args.value.startDate).toString();
+        _endDate = DateFormat('yyyy-MM-dd').format(args.value.endDate ?? args.value.startDate).toString();
+      }
+  }
+
+
+
   Future _fetchBusImages(String token, int busId) async {
 
     String path = Service.TOUR_BUS_IMAGES;
@@ -247,6 +335,16 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
       print(e);
     }
   }
+}
+
+class AvailableDate{
+  String? startDate;
+  String? endDate;
+
+  AvailableDate({
+    required this.startDate,
+    required this.endDate
+  });
 }
 
 class FakeOrderHistory{
