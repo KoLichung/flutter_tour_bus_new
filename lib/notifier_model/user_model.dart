@@ -11,7 +11,6 @@ class UserModel extends ChangeNotifier {
   String? token;
   bool isLineLogin = false;
 
-
   void setUser(User theUser){
     _user = theUser;
     // isNeedReloadIndexAndFilterCondition = true;

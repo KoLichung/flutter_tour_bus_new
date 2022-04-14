@@ -24,11 +24,27 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
 
   PassengerOrderStatus orderStatus = PassengerOrderStatus();
 
+  static const EventChannel paymentCallBackChannel = EventChannel('samples.flutter.io/pay_ec_pay_call_back');
+
   @override
   void initState() {
     // TODO: implement initState
     _fetchOrderList();
     super.initState();
+    paymentCallBackChannel.receiveBroadcastStream().listen(_onPaymentState, onError: _onPaymentError);
+  }
+
+  void _onPaymentState(Object? event) {
+    print(event.toString());
+    if(event.toString() == 'success'){
+      Navigator.pushNamed(context, '/payment_confirmed');
+    }else if(event.toString() == 'fail'){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('交易失敗!')));
+    }
+  }
+
+  void _onPaymentError(Object error) {
+    print("payment state listen error");
   }
 
   @override
@@ -58,8 +74,8 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
                   children: [
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-                      // trailing: orderStatus.waitingForPayment(context),
-                      trailing: Text(orderList[i].state), //要判斷state內容顯示不同的(外框文字)狀態
+                      trailing: orderStatus.waitingForPayment(context),
+                      // trailing: Text(orderList[i].state), //要判斷state內容顯示不同的(外框文字)狀態
                       title: Text('名稱：遊覽車名稱待改'),
                       subtitle: Text('旅行社名稱待改 價格待改  \n租車日期： $startDate~$endDate'),
                     ),
@@ -133,14 +149,16 @@ class PassengerOrderStatus {
     }
     print(message);
     if(token != ""){
-      // _payECPay();
+      // _payECPay(token);
     }
   }
 
-  Future<void> _payECPay() async {
+  Future<void> _payECPay(String token) async {
     String message;
     try {
-      final result = await methodPayChannel.invokeMethod('payECPay');
+      final result = await methodPayChannel.invokeMethod('payECPay',  <String, dynamic>{
+        "token": token,
+      });
       message = 'return message: $result';
     } on PlatformException {
       message = 'Failed to get test token.';
@@ -163,10 +181,10 @@ class PassengerOrderStatus {
   waitingForPayment(context){
     return GestureDetector(
       onTap: (){
-        _getTestToken();
-        // print('tap pay');
+        _fetchPaymentToken(context,1);
+        // _getTestToken();
+
         // _payECPay();
-        // Navigator.pushNamed(context, '/payment_confirmed');
       },
       child: const CustomOutlinedText(
         color: AppColor.pending,
@@ -191,5 +209,34 @@ class PassengerOrderStatus {
     return const CustomOutlinedText(
         color: AppColor.yellow,
         title: '已結案');
+  }
+
+  Future _fetchPaymentToken(BuildContext context,int orderId) async {
+
+    String path = Service.PATH_GET_PAYMENT_TOKEN;
+    try {
+
+      final queryParameters = {
+        "order_id" : orderId.toString(),
+      };
+
+      final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+        // print(map);
+        if(map['Token']!=null){
+          print('token ${map['Token']}');
+          _payECPay(map['Token']);
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('無法正確取得付款資訊!')));
+        }
+        // setState(() {});
+
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 }

@@ -20,6 +20,8 @@ class Service{
 
   static const PATH_MEDIA = '/media/';
 
+  static const PATH_GET_PAYMENT_TOKEN = '/api/ecpay/get_token';
+
   static Uri standard({String? path, Map<String, String>? queryParameters}) {
     print(Uri.http(_HOST, '$path', queryParameters));
     return Uri.http(_HOST, '$path', queryParameters);

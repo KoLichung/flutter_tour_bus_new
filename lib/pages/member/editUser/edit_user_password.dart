@@ -75,7 +75,7 @@ class _EditUserPasswordState extends State<EditUserPassword> {
               }else if(newPasswordController.text != newPasswordAgainController.text){
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("再次輸入密碼不相同！"),));
               }else{
-                var userModel = context.read<UserModel>();
+                // var userModel = context.read<UserModel>();
                 _putUpdateUserPassword(userModel.token!, oldPasswordController.text, newPasswordController.text);
               }
             },
