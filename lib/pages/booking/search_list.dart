@@ -109,7 +109,14 @@ class _SearchListState extends State<SearchList> {
                     ),
                     title:
                     (busResult[i].isTop!)?
-                    Text('${busResult[i].title!} 置頂車輛', style: Theme.of(context).textTheme.subtitle2,)
+                        Row(children: [
+                          Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
+                          const SizedBox(width: 10,),
+                          const Chip(
+                            visualDensity: VisualDensity(horizontal: 0, vertical: -2),
+                            backgroundColor: AppColor.pending,
+                            label: Text('置頂推薦',style: TextStyle(fontSize: 13,color: Colors.white),),)
+                        ],)
                     :
                     Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
                     // subtitle:RichText(
