@@ -1,36 +1,28 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/models/announcement.dart';
+import 'package:flutter_tour_bus_new/constant.dart';
+import 'package:http/http.dart' as http;
 
+class InquiryNotice extends StatefulWidget {
 
+  const InquiryNotice({Key? key}) : super(key: key);
 
-class InquiryNotice extends StatelessWidget {
-  // const InquiryNotice({Key? key}) : super(key: key);
+  @override
+  _InquiryNoticeSate createState() => _InquiryNoticeSate();
+}
 
+class _InquiryNoticeSate extends  State<InquiryNotice> {
 
-  List<FakeInquiryData> fakeDataList = [
-    FakeInquiryData(
-        issueDate: '2022-01-03',
-        passengerName: '王小明',
-        passengerPhoneNumber:'0912345678',
-        busType:'20人座遊覽車',
-        startDate:'2022-02-06',
-        endDate:'2022-02-09',
-        fromCity:'台中',
-        toCity:'苗栗',
-        note:'沒有',
-        ),
-    FakeInquiryData(
-      issueDate: '2022-01-03',
-      passengerName: '劉小美',
-      passengerPhoneNumber:'0912345678',
-      busType:'30人座遊覽車',
-      startDate:'2022-02-06',
-      endDate:'2022-02-09',
-      fromCity:'桃園',
-      toCity:'苗栗',
-      note:'沒有',
-    ),
-  ];
+  List<Announcement> announcementList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _httpGetAnnouncements();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +33,18 @@ class InquiryNotice extends StatelessWidget {
           ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: fakeDataList.length,
+              itemCount: announcementList.length,
               itemBuilder:(BuildContext context,int i){
                 return  Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                     children:[
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 10),
-                        child: Text('${fakeDataList[i].issueDate}\n${fakeDataList[i].passengerName}  ${fakeDataList[i].passengerPhoneNumber}\n車型： ${fakeDataList[i].busType}\n租車時間： ${fakeDataList[i].startDate} - ${fakeDataList[i].endDate}\n出發地： ${fakeDataList[i].fromCity} 目的地： ${fakeDataList[i].toCity}\n消費者備註：\n${fakeDataList[i].note}'),
+                        child: Text('${announcementList[i].announceDateTime!.substring(0,10)}\n'
+                            '${announcementList[i].name} ${announcementList[i].phone}\n車型： ${announcementList[i].numbersOfPeople}\n'
+                            '租車時間： ${announcementList[i].startDateTime!.substring(0,10)}~${announcementList[i].endDateTime!.substring(0,10)}\n'
+                            '出發地： ${announcementList[i].depatureCity} 目的地： ${announcementList[i].destinationCity}\n'
+                            '消費者備註：\n${announcementList[i].memo}'),
                       ),
                       const Divider(color: AppColor.lightGrey,)
 
@@ -62,29 +58,22 @@ class InquiryNotice extends StatelessWidget {
       ),
     );
   }
-}
 
-class FakeInquiryData{
-  String issueDate;
-  String passengerName;
-  String passengerPhoneNumber;
-  String busType;
-  String startDate;
-  String endDate;
-  String fromCity;
-  String toCity;
-  String note;
+  Future _httpGetAnnouncements() async {
 
-  FakeInquiryData({
-    required this.issueDate,
-    required this.passengerName,
-    required this.passengerPhoneNumber,
-    required this.busType,
-    required this.startDate,
-    required this.endDate,
-    required this.fromCity,
-    required this.toCity,
-    required this.note
-  });
+    String path = Service.ANNOUNCEMENT;
+    try {
+      final response = await http.get(Service.standard(path: path));
+      // print(response.body);
 
+      if (response.statusCode == 200) {
+        // print(response.body);
+        List<dynamic> dataList = json.decode(utf8.decode(response.body.runes.toList()));
+        announcementList = dataList.map((value) => Announcement.fromJson(value)).toList();
+        setState(() {});
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 }

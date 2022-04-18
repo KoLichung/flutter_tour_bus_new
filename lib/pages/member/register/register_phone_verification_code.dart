@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tour_bus_new/pages/member/register/register_identity.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_tour_bus_new/constant.dart';
 
 class RegisterPhoneVerificationCode extends StatefulWidget {
 
@@ -27,6 +32,7 @@ class _RegisterPhoneVerificationCodeState extends State<RegisterPhoneVerificatio
   FocusNode textFocusNodeFour = FocusNode();
 
   int runDownSecond = 60;
+  Timer? _timer;
 
   String theCode = '';
 
@@ -34,6 +40,7 @@ class _RegisterPhoneVerificationCodeState extends State<RegisterPhoneVerificatio
   void initState() {
     super.initState();
     theCode = widget.code;
+    _startTimer();
   }
 
   @override
@@ -90,7 +97,13 @@ class _RegisterPhoneVerificationCodeState extends State<RegisterPhoneVerificatio
               },
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                if(runDownSecond!=0){
+                  ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('請等待時間結束再重新發送！')));
+                }else{
+                  _getVerifyCode(widget.phone);
+                }
+              },
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 30),
                 alignment: Alignment.center,
@@ -149,5 +162,58 @@ class _RegisterPhoneVerificationCodeState extends State<RegisterPhoneVerificatio
     );
   }
 
+  void _startTimer(){
+    runDownSecond = 60;
+    _timer = Timer.periodic(const Duration(seconds:1), (timer){
+      if(runDownSecond!=0) {
+        runDownSecond --;
+        setState(() {});
+      }else{
+        _timer!.cancel();
+        _timer = null;
+      }
+    });
+  }
+
+  Future _getVerifyCode(String phone) async {
+    String path = Service.PATH_GET_SMS_VERIFY;
+
+    try {
+
+      final queryParameters = {
+        'phone': phone,
+      };
+
+      final response = await http.get(
+        Service.standard(path: path, queryParameters: queryParameters),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      print(response.body);
+
+      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+      if(map['code'] != null){
+        theCode = map['code'].toString();
+        _startTimer();
+      }else{
+        ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('可能網路不佳，請再試一次！')));
+      }
+
+    } catch (e) {
+      print(e);
+      return "error";
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if(_timer!=null){
+      _timer!.cancel();
+      _timer = null;
+    }
+  }
 
 }

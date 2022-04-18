@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tour_bus_new/color.dart';
@@ -6,9 +8,21 @@ import 'package:flutter_tour_bus_new/pages/booking/rental_bus_detail.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_tour_bus_new/models/bus.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/city.dart';
+import '../../notifier_model/user_model.dart';
+import '../member/login_register.dart';
 
 class SearchList extends StatefulWidget {
-  const SearchList({Key? key}) : super(key: key);
+  final String fromCity;
+  final String toCity;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String numberOfPeople;
+
+  const SearchList({Key? key, required this.fromCity, required this.toCity, required this.startDate, required this.endDate, required this.numberOfPeople}) : super(key: key);
 
   @override
   _SearchListState createState() => _SearchListState();
@@ -17,6 +31,7 @@ class SearchList extends StatefulWidget {
 class _SearchListState extends State<SearchList> {
 
   List<Bus> busResult =[];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -28,15 +43,25 @@ class _SearchListState extends State<SearchList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('台北市 3/1~3/2'),),
+      appBar: AppBar(title: Text('${widget.fromCity} ${DateFormat('MM/dd').format(widget.startDate)}~${DateFormat('MM/dd').format(widget.endDate)}'),),
       body: Column(
         children: [
           checkBusResult(),
           GestureDetector(
             child: const Text('沒有符合的需求，填寫需求單', style: TextStyle(color: AppColor.yellow, fontSize: 20, decoration: TextDecoration.underline,),),
             onTap: (){
-              Navigator.pushNamed(context, '/inquiry_form');
-            },),
+              var userModel = context.read<UserModel>();
+              if(userModel.isLogin()){
+                Navigator.pushNamed(context, '/inquiry_form');
+              } else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginRegister(),
+                    ));
+              }
+            }
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -55,7 +80,7 @@ class _SearchListState extends State<SearchList> {
   // RelativeRect get relRectSize => RelativeRect.fromSize(tapXY & const Size(40,40), overlay.size);
 
   checkBusResult(){
-    if(busResult.isEmpty){
+    if(isLoading){
       return Center(
         child: CircularProgressIndicator(
           valueColor: const AlwaysStoppedAnimation<Color>(Colors.yellow),
@@ -73,44 +98,41 @@ class _SearchListState extends State<SearchList> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
-                    leading: Container(
-                      height: 100,
+                    leading:
+                    (busResult[i].coverImage!=null)?
+                    Container(
                       width: 100,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(image: AssetImage('images/tour_bus.jpeg'),fit: BoxFit.fill)),
+                      child: Image.network(busResult[i].coverImage!,fit: BoxFit.cover,),
+                    ):
+                    Container(
+                      width: 100,
                     ),
-                    title: Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
-                    subtitle:RichText(
-                      text: TextSpan(text: busResult[i].vehicalBodyNumber,
-                        style:const TextStyle(color: AppColor.grey),
-                        children: <TextSpan>[
-                          TextSpan(text: '\n所在地：${busResult[i].city}\n年份：2022  座位：${busResult[i].vehicalSeats}',
-                            style: Theme.of(context).textTheme.bodyText2,),
-                        ],
-                      ),),
+                    title:
+                    (busResult[i].isTop!)?
+                    Text('${busResult[i].title!} 置頂車輛', style: Theme.of(context).textTheme.subtitle2,)
+                    :
+                    Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
+                    // subtitle:RichText(
+                    //     text: TextSpan(text: busResult[i].vehicalBodyNumber,
+                    //             style:const TextStyle(color: AppColor.grey),
+                    //             children: <TextSpan>[
+                    //               TextSpan(text: '\n所在地：${busResult[i].city}\n年份：${busResult[i].vehicalYearOfManufacture!}  座位：${busResult[i].vehicalSeats}',
+                    //                 style: Theme.of(context).textTheme.bodyText2,),
+                    //             ],
+                    //           ),
+                    // ),
+                    subtitle: Text('所在地：${busResult[i].city}\n年份：${busResult[i].vehicalYearOfManufacture!}  座位：${busResult[i].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2),
                     onTap: (){
                       Bus theBus = busResult[i];
-                      Bus busDetail = Bus(
-                          id: theBus.id,
-                          title: theBus.title,
-                          lat: theBus.lat,
-                          lng: theBus.lng,
-                          city: theBus.city,
-                          county: theBus.county,
-                          vehicalSeats: theBus.vehicalSeats,
-                          vehicalLicence: theBus.vehicalLicence,
-                          vehicalOwner: theBus.vehicalOwner,
-                          vehicalEngineNumber: theBus.vehicalEngineNumber,
-                          vehicalBodyNumber: theBus.vehicalBodyNumber,
-                          vehicalLicenceImage: theBus.vehicalLicenceImage,
-                          isPublish: theBus.isPublish,
-                          user: theBus.user);
-
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => RentalBusDetail(
-                              theBusDetail: busDetail,
+                              theBus: theBus,
+                              fromCity: widget.fromCity,
+                              toCity: widget.toCity,
+                              startDate: widget.startDate,
+                              endDate: widget.endDate,
                             ),
                           ));
                       // Navigator.pushNamed(context, '/bus_detail');
@@ -146,10 +168,20 @@ class _SearchListState extends State<SearchList> {
       // NOTE: even you didnt select item this method will be called with null of value so you should call your call back with checking if value is not null
       if(value!=null){
         print(value);
+        if(value==1){
+          City theCity = City.getCityFromName(widget.fromCity);
+          busResult.sort( (a,b) => _calculateDistance(theCity.lat, theCity.lng, a.lat, a.lng).compareTo(_calculateDistance(theCity.lat, theCity.lng, b.lat, b.lng)) );
+        }else if(value==2){
+          busResult.sort((a, b) => - int.parse(a.vehicalYearOfManufacture!).compareTo(double.parse(b.vehicalYearOfManufacture!)));
+        }else if(value==3){
+          busResult.sort((a, b) => - (a.vehicalSeats!).compareTo(b.vehicalSeats!));
+        }else if(value==4){
+          busResult.sort((a, b) => (a.vehicalSeats!).compareTo(b.vehicalSeats!));
+        }
+        setState(() {});
       }
     });
   }
-
 
   Future _fetchSearchResult() async {
     String path = Service.SEARCH_BUS;
@@ -173,7 +205,9 @@ class _SearchListState extends State<SearchList> {
         // print(busResult);
 
 
-        setState(() {});
+        setState(() {
+          isLoading = false;
+        });
 
         // if (response.statusCode == 200) {
         //   // print(response.body);
@@ -191,14 +225,13 @@ class _SearchListState extends State<SearchList> {
     }
   }
 
-}
+  double _calculateDistance(lat1, lon1, lat2, lon2){
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 - c((lat2 - lat1) * p)/2 +
+        c(lat1 * p) * c(lat2 * p) *
+            (1 - c((lon2 - lon1) * p))/2;
+    return 12742 * asin(sqrt(a));
+  }
 
-class FakeTourBus {
- String title;
- String agentName;
- String location;
- String busYear;
- String seat;
-
-  FakeTourBus({ required this.title, required this.agentName, required this.location, required this.busYear, required this.seat});
 }

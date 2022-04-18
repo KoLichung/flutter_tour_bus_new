@@ -1,11 +1,18 @@
+import 'dart:convert';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
+import '../../models/announcement.dart';
 import '../../widgets/custom_member_page_button.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
 import 'login_register.dart';
+import 'package:flutter_tour_bus_new/constant.dart';
+import 'package:http/http.dart' as http;
+
 
 class MemberPage extends StatefulWidget {
   const MemberPage({Key? key}) : super(key: key);
@@ -15,6 +22,19 @@ class MemberPage extends StatefulWidget {
 }
 
 class _MemberPageState extends State<MemberPage> {
+
+  int lengthOfAnnounce = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    print('at init');
+    var userModel = context.read<UserModel>();
+    if(userModel.isLogin() && userModel.user!.isOwner!){
+      _httpGetAnnouncements();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,87 +126,99 @@ class _MemberPageState extends State<MemberPage> {
                         icon: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                       ),),]),
             ),
-            const Divider(
-              color: AppColor.superLightGrey,
-              thickness: 8,
-            ),
-            const Align(alignment:Alignment.centerLeft,child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 10),
-              child: Text('業主功能：'),
-            )),
-            const Divider(
-              color: Color(0xffe5e5e5),
-              thickness: 1,
-            ),
-            CustomMemberPageButton(
-              title: '訂單列表',
-              onPressed: () {
-                Navigator.pushNamed(context, '/drivers_booking_list');
-              },
-            ),
-            CustomMemberPageButton(
-              title: '汽車列表',
-              onPressed: () {
-                Navigator.pushNamed(context, '/bus_list');
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 0),
-              child: Row(
-                  children:[
-                    const Expanded(flex:3,
-                        child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 30.0),
-                      child: Text('租賃需求'),
-                    )),
-                    Expanded(
-                        flex: 3,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6,vertical: 3),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: AppColor.yellow,
-                              width: 1,
-                              
+            Consumer<UserModel>(builder: (context, userModel, child) => (userModel.isLogin() && userModel.user!.isOwner!) ?
+              Column(
+                children: [
+                  const Divider(
+                    color: AppColor.superLightGrey,
+                    thickness: 8,
+                  ),
+                  const Align(alignment:Alignment.centerLeft,child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 10),
+                    child: Text('業主功能：'),
+                  )),
+                  const Divider(
+                    color: Color(0xffe5e5e5),
+                    thickness: 1,
+                  ),
+                  CustomMemberPageButton(
+                    title: '訂單列表',
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/drivers_booking_list');
+                    },
+                  ),
+                  CustomMemberPageButton(
+                    title: '汽車列表',
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/bus_list');
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 0),
+                    child: Row(
+                        children:[
+                          const Expanded(flex:3,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 30.0),
+                                child: Text('租賃需求'),
+                              )),
+                          Expanded(
+                              flex: 3,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6,vertical: 3),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: AppColor.yellow,
+                                    width: 1,
+
+                                  ),
+                                ),
+
+                                child: Text('今日有 $lengthOfAnnounce 則新需求', style: TextStyle(color: AppColor.yellow),),
+                              )
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: IconButton(
+                              // constraints: BoxConstraints(),
+                              // padding: EdgeInsets.zero,
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/inquiry_notice');
+                              },
+                              icon: const Icon(Icons.arrow_forward_ios, color:Colors.grey),
                             ),
                           ),
 
-                          child: const Text('今日有 3 則新需求', style: TextStyle(color: AppColor.yellow),),
-                        )
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        // constraints: BoxConstraints(),
-                        // padding: EdgeInsets.zero,
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/inquiry_notice');
-                        },
-                        icon: const Icon(Icons.arrow_forward_ios, color:Colors.grey),
-                      ),
-                    ),
+                        ]
 
-                  ]
-
+                    ),
+                  ),
+                  const Divider(
+                    thickness: 1,
+                    color: Color(0xffe5e5e5),
+                  ),
+                ],
+              ):
+              const Divider(
+                color: Color(0xffe5e5e5),
+                thickness: 1,
               ),
             ),
-            const Divider(
-              thickness: 1,
-              color: Color(0xffe5e5e5),
-            ),
-            Consumer<UserModel>(
-            builder: (context, userModel, child) => (userModel.isLogin())
-                ? CustomElevatedButton(onPressed: (){
-              // UserUtil.clearUserInfo();
+            Consumer<UserModel>(builder: (context, userModel, child) => (userModel.isLogin()) ?
+            CustomElevatedButton(onPressed: (){
+                // UserUtil.clearUserInfo();
 
-              var userModel = context.read<UserModel>();
-              // if (userModel.user!.loginMethod == LoginMethod.line_id) {
-              //   _lineLogOut();
-              // }
-              userModel.removeUser(context);
-            }, title:'登出', color: AppColor.lightGrey)
+                var userModel = context.read<UserModel>();
+                // if (userModel.user!.loginMethod == LoginMethod.line_id) {
+                //   _lineLogOut();
+                // }
+                userModel.removeUser(context);
+              },
+                title:'登出',
+                color: AppColor.lightGrey
+            )
                 : const SizedBox()
             )
 
@@ -197,6 +229,25 @@ class _MemberPageState extends State<MemberPage> {
     );
   }
 
+  Future _httpGetAnnouncements() async {
+
+    String path = Service.ANNOUNCEMENT;
+    try {
+      final response = await http.get(Service.standard(path: path));
+      // print(response.body);
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        List<dynamic> dataList = json.decode(utf8.decode(response.body.runes.toList()));
+        List<Announcement> announcementList = dataList.map((value) => Announcement.fromJson(value)).toList();
+        lengthOfAnnounce = announcementList.length;
+        setState(() {});
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   // Future<Null> _lineLogOut() async {
   //   try {
   //     await LineSDK.instance.logout();
@@ -204,7 +255,6 @@ class _MemberPageState extends State<MemberPage> {
   //     print(e.message);
   //   }
   // }
-
 
 }
 

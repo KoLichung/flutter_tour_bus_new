@@ -4,8 +4,8 @@ class Bus {
   int? id;
   int? user;
   String? title;
-  String? lat;
-  String? lng;
+  double? lat;
+  double? lng;
   String? city;
   String? county;
   int? vehicalSeats;
@@ -13,8 +13,10 @@ class Bus {
   String? vehicalOwner;
   String? vehicalEngineNumber;
   String? vehicalBodyNumber;
+  String? vehicalYearOfManufacture;
   String? vehicalLicenceImage;
   bool? isPublish;
+  bool? isTop;
   String? coverImage;
   DateTime? recentStartDate;
   DateTime? recentEndDate;
@@ -32,8 +34,10 @@ class Bus {
         this.vehicalOwner,
         this.vehicalEngineNumber,
         this.vehicalBodyNumber,
+        this.vehicalYearOfManufacture,
         this.vehicalLicenceImage,
         this.isPublish,
+        this.isTop,
         this.coverImage,
         this.recentStartDate,
         this.recentEndDate});
@@ -43,8 +47,8 @@ class Bus {
     user = json['user'];
     title = json['title'];
     try{
-      lat = json['lat'];
-      lng = json['lng'];
+      lat = double.parse(json['lat']);
+      lng = double.parse(json['lng']);
     }catch(e){
       print(e);
     }
@@ -59,8 +63,11 @@ class Bus {
     vehicalOwner = json['vehicalOwner'];
     vehicalEngineNumber = json['vehicalEngineNumber'];
     vehicalBodyNumber = json['vehicalBodyNumber'];
-    vehicalLicenceImage = json['vehicalLicenceImage'];
+    vehicalLicence = json['vehicalLicence'];
+    vehicalYearOfManufacture = json['vehicalYearOfManufacture'];
+
     isPublish = json['isPublish'];
+    isTop = json['isTop'];
     try{
       String path = Service.PATH_MEDIA + json['coverImage'];
       coverImage = Service.standard(path: path).toString() ;
@@ -90,6 +97,9 @@ class Bus {
     data['vehicalEngineNumber'] = this.vehicalEngineNumber;
     data['vehicalBodyNumber'] = this.vehicalBodyNumber;
     data['vehicalLicenceImage'] = this.vehicalLicenceImage;
+    data['vehicalYearOfManufacture'] = this.vehicalYearOfManufacture;
+    data['isPublish'] = this.isPublish;
+    data['isTop'] = this.isTop;
     data['recent_start_date'] = this.recentStartDate;
     data['recent_end_date'] = this.recentEndDate;
     return data;

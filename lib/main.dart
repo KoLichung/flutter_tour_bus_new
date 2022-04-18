@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_tour_bus_new/pages/member/buses/edit_bus_profile.dart';
 import 'package:flutter_tour_bus_new/pages/member/editUser/edit_user_profile.dart';
 import 'package:flutter_tour_bus_new/pages/booking/inquiry_form.dart';
 import 'package:flutter_tour_bus_new/pages/member/inquiry_notice.dart';
+import 'models/announcement.dart';
 import 'pages/member/login_register.dart';
 import 'pages/booking/payment_confirmed.dart';
 import 'package:flutter_tour_bus_new/pages/booking/rental_confirmation.dart';
@@ -31,7 +34,8 @@ import 'pages/member/buses/drivers_bus_list.dart';
 import 'pages/member/buses/add_new_bus.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
-
+import 'package:flutter_tour_bus_new/constant.dart';
+import 'package:http/http.dart' as http;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -109,7 +113,7 @@ class MyApp extends StatelessWidget {
       home: const MyHomePage(),
       routes:  {
         '/main': (context) => const MyHomePage(),
-        '/search_list': (context) => const SearchList(),
+        // '/search_list': (context) => const SearchList(),
         '/inquiry_form': (context) => const InquiryForm(),
         // '/bus_detail': (context) => RentalBusDetail(),
         '/login_register': (context) => const LoginRegister(),
@@ -122,7 +126,8 @@ class MyApp extends StatelessWidget {
         '/payment_confirmed': (context) => const PaymentConfirmed(),
         '/bus_list': (context) => const DriversBusList(),
         '/add_new_bus': (context) => const AddNewBus(),
-        '/edit_bus_profile': (context) => const EditBusProfile(),
+        // '/edit_bus_profile': (context) => const EditBusProfile(),
+        // '/drivers_bus_detail': (context) => const DriversBusDetail(),
         '/drivers_booking_list': (context) => const DriversBookingList(),
         '/drivers_booking_detail': (context) => const DriversBookingDetail(),
 
@@ -156,7 +161,9 @@ class _MyHomePageState extends State<MyHomePage> {
     String? token = await FirebaseMessaging.instance.getAPNSToken();
     print('Got APNs token: $token');
     FirebaseMessaging.instance.getToken().then((token){
-      print('the token: ' + token.toString());
+      print('the fcm token: ' + token.toString());
+      var userModel = context.read<UserModel>();
+      userModel.fcmToken = token.toString();
     });
   }
 
@@ -169,7 +176,9 @@ class _MyHomePageState extends State<MyHomePage> {
       getAPNSToken();
     }else{
       FirebaseMessaging.instance.getToken().then((token){
-        print('the token: ' + token.toString());
+        print('the fcm token: ' + token.toString());
+        var userModel = context.read<UserModel>();
+        userModel.fcmToken = token.toString();
       });
     }
 
@@ -180,6 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       print('Message clicked!');
     });
+
   }
 
   @override
@@ -213,6 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
   pageCaller(int index){
     switch (index){
       case 0 : { return const HomePage();}
@@ -221,4 +232,5 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
   }
+
 }

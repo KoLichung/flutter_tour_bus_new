@@ -1,19 +1,28 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/models/tour_bus_image.dart';
+import 'package:flutter_tour_bus_new/pages/member/buses/edit_bus_profile.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_big_outlined_button.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tour_bus_new/constant.dart';
+import '../../../models/bus.dart';
+import '../../../models/bus_rent_day.dart';
 import '../../../notifier_model/user_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_tour_bus_new/widgets/custom_outlined_text.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
+import 'drivers_bus_detail_delete_date_dialog.dart';
+
+import 'package:intl/intl.dart';
 
 class DriversBusDetail extends StatefulWidget {
 
-  final int busId;
+  final Bus bus;
 
-  const DriversBusDetail({Key? key, required this.busId}) : super(key: key);
+  const DriversBusDetail({Key? key, required this.bus}) : super(key: key);
 
   @override
   State<DriversBusDetail> createState() => _DriversBusDetailState();
@@ -21,36 +30,66 @@ class DriversBusDetail extends StatefulWidget {
 
 class _DriversBusDetailState extends State<DriversBusDetail> {
 
-  List<FakeOrderHistory> fakeOrderList = [
-    FakeOrderHistory(busType:'20人座遊覽車', startDate:'2022-01-06', endDate:'2022-01-09', agentName: '長興旅行社', price: '8000'),
-    FakeOrderHistory(busType:'30人座遊覽車', startDate:'2022-02-06', endDate:'2022-02-09', agentName: '長興旅行社', price: '5000'),
-  ];
-
-  List<String> fakeDate = ['2022-01-10~2022-01-16','2022-01-17~2022-01-31','2022-02-06~2022-02-19','2022-03-15~2022-03-26'];
+  // List<String> fakeDate = ['2022-01-10~2022-01-16','2022-01-17~2022-01-31','2022-02-06~2022-02-19','2022-03-15~2022-03-26'];
 
   List<TourBusImage> listBusImages = [];
+
+  String? _startDate;
+  String? _endDate;
+  final DateRangePickerController _controller = DateRangePickerController();
+
+  // List<AvailableDate> availableDateList = [];
+
+  List<BusRentDay> availableDays = [];
+  List<BusRentDay> orderedDays = [];
+  List<BusRentDay> pastDays = [];
+
+  // int? theBusId;
+  Bus? theBus;
+
+  bool isBusListNeedRefresh = false;
 
   @override
   void initState() {
     super.initState();
-    var userModel = context.read<UserModel>();
-    _fetchBusImages(userModel.token!, widget.busId);
+
+    theBus = widget.bus;
+    _fetchBusImages(theBus!.id!);
+    _fetchBusRentDays(theBus!.id!);
+
+    // print(userModel.currentBus!.toJson());
   }
 
   @override
   Widget build(BuildContext context) {
-    var userModel = context.read<UserModel>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('車輛詳細'),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: (){
+          if(isBusListNeedRefresh==true){
+            Navigator.pop(context, 'refresh');
+          }else{
+            Navigator.pop(context);
+          }
+        }),
         actions: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: GestureDetector(
               child: const Icon(Icons.edit),
-              onTap: () {
-                Navigator.pushNamed(context, '/edit_bus_profile');
+              onTap: () async {
+                // Navigator.pushNamed(context, '/edit_bus_profile');
+                final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>  EditBusProfile(theBus: theBus!, listBusImages: listBusImages)));
+
+                if(result=='ok'){
+                  var userModel = context.read<UserModel>();
+                  _httpGetBus(userModel.token!, theBus!.id!);
+                  _fetchBusImages(theBus!.id!);
+                  isBusListNeedRefresh = true;
+                }
+
               },
             ),)],),
       body: SingleChildScrollView(
@@ -73,117 +112,69 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
                       );
                     }
                 )
-                // ListView(
-                //   shrinkWrap: true,
-                //   scrollDirection: Axis.horizontal,
-                //   children: [
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //     Container(
-                //       margin: const EdgeInsets.fromLTRB(0, 20, 5, 0),
-                //       width: 100,
-                //       height: 100,
-                //       decoration: const BoxDecoration(
-                //         image: DecorationImage(image:AssetImage('images/tour_bus.jpeg',),
-                //             fit:BoxFit.fill),),
-                //     ),
-                //   ],
-                // ),
               ),
-
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                    '名稱： ${fakeOrderList[0].busType}\n車輛所在地：台中市南區',style: const TextStyle(height: 2),),
+              Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: (theBus!.isPublish!)?const Text('目前狀態：上架中'):const Text('目前狀態：下架中'),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '名稱： ${theBus!.title}\n車輛所在地：${theBus!.city}${theBus!.county}',style: const TextStyle(height: 2),),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
               ),
               Row(
                 children: [
                   const Text('設定可出租日期：'),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10,vertical: 6),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColor.yellow,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                  ),
-                    child: Text('新增', style: TextStyle(color: AppColor.yellow),),
-                  )]
-              ),
+                  GestureDetector(
+                    child: const CustomOutlinedText(title: '新增', color:  AppColor.yellow),
+                    onTap: (){
+                      showDialog<Widget>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return getDatePicker();
+                          });
+                    }),
+                ]),
               ListView.builder(
                 padding: const EdgeInsets.only(bottom: 6),
                 physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
-                itemCount: fakeDate.length,
+                itemCount: availableDays.length,
                 itemBuilder: (context, index) {
-                  final date = fakeDate[index];
-                  return Dismissible(
-                      key: Key(date),
-                      onDismissed: (direction) {
-                        // Remove the item from the data source.
-                        setState(() {
-                          fakeDate.removeAt(index);
-                        });
-                        // Then show a snackbar.
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$date 已刪除')));
-                      },
-                      background: Container(color: Colors.red),
-                      child: Row(
-                        children: [
-                          Text(fakeDate[index],style: const TextStyle(height: 2),),
-                          const SizedBox(width: 10,),
-                          const Icon(Icons.remove_circle,color: Colors.red,)
-                        ],
-                      ));
+                  // final date = availableDateList[index];
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text('${availableDays[index].startDate!.substring(0,10)} ~ ${availableDays[index].endDate!.substring(0,10)}'),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.delete_forever,color: Colors.red,),
+                          onPressed:() async {
+                            var data = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return DriversBusDetailDeleteDateDialog(availableDate: availableDays[index]);
+                                });
+                            if (data == 'confirmDelete'){
+                              setState(() {
+                                _destroyBusRentDay(availableDays[index]);
+                                availableDays.removeAt(index);
+                              });
+                            }
+                          })],
+                  );
                 },
+              ),
+              const SizedBox(
+                height: 10,
               ),
               const Align(
                   alignment:Alignment.centerLeft,
@@ -193,14 +184,17 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
                 scrollDirection: Axis.vertical,
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: fakeDate.length,
+                itemCount: orderedDays.length,
                 itemBuilder: (context, index) {
-                  return Text(fakeDate[index],style: const TextStyle(height: 2),);
+                  return Text('${orderedDays[index].startDate!.substring(0,10)} ~ ${orderedDays[index].endDate!.substring(0,10)}',style: const TextStyle(height: 2),);
                 },
               ),
-              CustomBigOutlinedButton(
-                  onPressed: (){},
-                  title: '更多'),
+              // CustomBigOutlinedButton(
+              //     onPressed: (){},
+              //     title: '更多'),
+              const SizedBox(
+                height: 10,
+              ),
               const Align(
                   alignment:Alignment.centerLeft,
                   child:Text('歷史出租紀錄：')),
@@ -209,14 +203,14 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
                 scrollDirection: Axis.vertical,
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: fakeDate.length,
+                itemCount: pastDays.length,
                 itemBuilder: (context, index) {
-                  return Text(fakeDate[index],style: const TextStyle(height: 2),);
+                  return Text('${pastDays[index].startDate!.substring(0,10)}~${pastDays[index].endDate!.substring(0,10)}',style: const TextStyle(height: 2),);
                 },
               ),
-              CustomBigOutlinedButton(
-                  onPressed: (){},
-                  title: '更多'),
+              // CustomBigOutlinedButton(
+              //     onPressed: (){},
+              //     title: '更多'),
             ],
           ),
         ),
@@ -224,7 +218,63 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
     );
   }
 
-  Future _fetchBusImages(String token, int busId) async {
+  getDatePicker(){
+    return Center(
+      child: SizedBox(
+        height: 460,
+        width: 360,
+        child: SfDateRangePickerTheme(
+          data: SfDateRangePickerThemeData(
+            brightness: Brightness.light,
+            backgroundColor: Colors.white,
+          ),
+          child: SfDateRangePicker(
+            controller: _controller,
+            view: DateRangePickerView.month,
+            monthViewSettings: const DateRangePickerMonthViewSettings(
+              firstDayOfWeek: 1,
+            ),
+            headerHeight: 60,
+            headerStyle: const DateRangePickerHeaderStyle(
+                backgroundColor: AppColor.yellow,
+                textAlign: TextAlign.center,
+                textStyle: TextStyle(
+                  fontSize: 22,
+                  letterSpacing: 3,
+                  color: Colors.white,
+                )),
+            selectionMode: DateRangePickerSelectionMode.range,
+            minDate: DateTime.now(),
+            onSelectionChanged: selectionChanged,
+            showActionButtons: true,
+            cancelText: '取消',
+            confirmText: '確定',
+            onSubmit: (Object? value, ) {
+              BusRentDay availableDay = BusRentDay(tourBus: theBus!.id!, state: "available", startDate: _startDate, endDate: _endDate);
+              // availableDays.add(availableDay);
+              _postCreateBusRentDay(availableDay);
+              // setState(() {});
+              Navigator.pop(context);
+            },
+            onCancel: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void selectionChanged(DateRangePickerSelectionChangedArgs args) {
+    // on selectionChanged 這裏僅是先記錄選取的 date
+    // 直到按下確定 submit 才需要存進資料裡
+      if(args.value.startDate != null && args.value.endDate != null ){
+        _startDate = DateFormat('yyyy-MM-dd').format(args.value.startDate).toString();
+        _endDate = DateFormat('yyyy-MM-dd').format(args.value.endDate ?? args.value.startDate).toString();
+      }
+  }
+
+  Future _fetchBusImages(int busId) async {
 
     String path = Service.TOUR_BUS_IMAGES;
     try {
@@ -247,6 +297,123 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
       print(e);
     }
   }
+
+  Future _httpGetBus(String token, int busId) async {
+
+    String path = Service.BUSSES + "$busId/";
+    try {
+
+      final response = await http.get(Service.standard(path: path),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Token $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+        theBus = Bus.fromJson(map);
+        setState(() {});
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _fetchBusRentDays(int busId) async {
+
+    String path = Service.TOUR_BUS_RENT_DAYS;
+    try {
+
+      final queryParameters = {
+        // "bus_id" : busId.toString(),
+        "bus_id" : "15",
+      };
+
+      final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        List body = json.decode(utf8.decode(response.body.runes.toList()));
+        List<BusRentDay> theDays = body.map((value) => BusRentDay.fromJson(value)).toList();
+
+        for(BusRentDay day in theDays){
+          if(day.state == 'available'){
+            availableDays.add(day);
+          }else if(day.state == 'ordered'){
+            orderedDays.add(day);
+          }else if(day.state == 'pasted'){
+            pastDays.add(day);
+          }
+        }
+
+        setState(() {});
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _postCreateBusRentDay(BusRentDay theDay) async {
+
+    String path = Service.TOUR_BUS_RENT_DAYS;
+    try {
+
+      final bodyParams = {
+        "state": theDay.state!,
+        "tourBus": theDay.tourBus!.toString(),
+        "startDate":  theDay.startDate!+"T00:00:00Z",
+        "endDate": theDay.endDate!+"T00:00:00Z",
+      };
+
+      final response = await http.post(Service.standard(path: path),
+        body:bodyParams,
+      );
+
+      print(response.body);
+
+      if (response.statusCode == 201) {
+        Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+        BusRentDay theDay = BusRentDay.fromJson(map);
+        availableDays.add(theDay);
+        setState(() {});
+
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已建立新可出租日期')));
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _destroyBusRentDay(BusRentDay theDay) async {
+
+    String path = Service.TOUR_BUS_RENT_DAYS+"${theDay.id!}/";
+    try {
+
+      final response = await http.delete(Service.standard(path: path));
+
+      print(response.statusCode);
+      print(response.body);
+
+      if (response.statusCode == 204) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已刪除可出租日期')));
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+}
+
+class AvailableDate{
+  String? startDate;
+  String? endDate;
+
+  AvailableDate({
+    required this.startDate,
+    required this.endDate
+  });
 }
 
 class FakeOrderHistory{

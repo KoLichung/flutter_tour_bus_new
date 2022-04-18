@@ -80,13 +80,18 @@ class _DriversBusListState extends State<DriversBusList> {
                         Text('最近出租日： \n${formatter.format(driversBusList[i].recentStartDate!)}~${formatter.format(driversBusList[i].recentEndDate!)}',)
                         :
                         const Text('尚無出租'),
-                        onTap: (){
+                        onTap: () async {
                           // Navigator.pushNamed(context, '/drivers_bus_detail');
-                          Navigator.push(
+                          final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>  DriversBusDetail(busId: driversBusList[i].id!),
+                                builder: (context) =>  DriversBusDetail(bus: driversBusList[i]),
                               ));
+
+                          if (result=='refresh'){
+                            print('refresh');
+                            _fetchDriversBusList();
+                          }
                         },
                       ),
                       const Divider(color: AppColor.lightGrey,)],);

@@ -19,6 +19,7 @@ class _RentalConfirmationState extends State<RentalConfirmation> {
     return Scaffold(
         appBar: AppBar(
           title: Text('包遊覽車'),
+          automaticallyImplyLeading: false,
         ),
         body: SingleChildScrollView(
           child: Column(

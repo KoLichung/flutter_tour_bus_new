@@ -52,13 +52,14 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('我的訂單'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: () {},
-              child:
-              const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],),
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(16.0),
+        //     child: GestureDetector(
+        //       onTap: () {},
+        //       child:
+        //       const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],
+      ),
       body: Column(
         children: [
           ListView.builder(
@@ -67,8 +68,8 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
               itemCount: orderList.length,
               itemBuilder:(BuildContext context,int i){
 
-                String startDate = DateFormat("yyyy-MM-dd").format(DateTime.parse(orderList[i].startDate));
-                String endDate = DateFormat("yyyy-MM-dd").format(DateTime.parse(orderList[i].endDate));
+                String startDate = DateFormat("yyyy-MM-dd").format(DateTime.parse(orderList[i].startDate!));
+                String endDate = DateFormat("yyyy-MM-dd").format(DateTime.parse(orderList[i].endDate!));
 
                 return  Column(
                   children: [
@@ -76,8 +77,8 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
                       trailing: orderStatus.waitingForPayment(context),
                       // trailing: Text(orderList[i].state), //要判斷state內容顯示不同的(外框文字)狀態
-                      title: Text('名稱：遊覽車名稱待改'),
-                      subtitle: Text('旅行社名稱待改 價格待改  \n租車日期： $startDate~$endDate'),
+                      title: Text('名稱：${orderList[i].busTitle!}'),
+                      subtitle: Text('車錢：\$${orderList[i].orderMoney!}  訂金：${orderList[i].depositMoney!}  \n租車日期： $startDate~$endDate'),
                     ),
                     const Divider(color: AppColor.lightGrey,)],);
               }),],
@@ -109,23 +110,6 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
       print(e);
     }
   }
-}
-
-class FakeOrderHistory{
-  String busType;
-  String startDate;
-  String endDate;
-  String agentName;
-  String price;
-
-  FakeOrderHistory({
-    required this.busType,
-    required this.startDate,
-    required this.endDate,
-    required this.agentName,
-    required this.price,
-  });
-
 }
 
 class PassengerOrderStatus {

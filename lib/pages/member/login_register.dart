@@ -1,3 +1,4 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:flutter_tour_bus_new/color.dart';
@@ -12,7 +13,7 @@ import 'dart:convert';
 import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
 import 'package:flutter_tour_bus_new/models/user.dart';
 import 'package:provider/provider.dart';
-
+import 'dart:io';
 
 class LoginRegister extends StatefulWidget {
   const LoginRegister({Key? key}) : super(key: key);
@@ -26,6 +27,14 @@ class _LoginRegisterState extends State<LoginRegister> {
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController pwdTextController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    var userModel = context.read<UserModel>();
+    if(userModel.deviceId==null){
+      _getDeviceInfo();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +162,8 @@ class _LoginRegisterState extends State<LoginRegister> {
         userModel.setUser(user!);
         userModel.token = token;
 
+        _httpPostFCMDevice();
+
         Navigator.pop(context, 'ok');
 
       }else{
@@ -186,6 +197,8 @@ class _LoginRegisterState extends State<LoginRegister> {
         userModel.setUser(user!);
         userModel.token = token;
         userModel.isLineLogin = true;
+
+        _httpPostFCMDevice();
 
         Navigator.pop(context);
       }else{
@@ -268,5 +281,47 @@ class _LoginRegisterState extends State<LoginRegister> {
     return null;
   }
 
+  Future _getDeviceInfo() async {
+    var userModel = context.read<UserModel>();
+    var deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) { // import 'dart:io'
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      String deviceID = iosDeviceInfo.identifierForVendor!;
+      print(deviceID);
+      userModel.deviceId = deviceID;
+      userModel.platformType = 'ios';
+    } else {
+      var androidDeviceInfo = await deviceInfo.androidInfo;
+      String deviceID =  androidDeviceInfo.androidId!;
+      print(deviceID);
+      userModel.deviceId = deviceID;
+      userModel.platformType = 'android';
+    }
+  }
+
+  Future<void> _httpPostFCMDevice() async {
+    print("postFCMDevice");
+    String path = Service.PATH_REGISTER_DEVICE;
+    var userModel = context.read<UserModel>();
+
+    try {
+      Map queryParameters = {
+        'user_id': userModel.user!.id.toString(),
+        'registration_id': userModel.fcmToken,
+        'device_id': userModel.deviceId,
+        'type': userModel.platformType!,
+      };
+
+      final response = await http.post(
+          Service.standard(path: path),
+          body: queryParameters,
+      );
+
+      print(response.body);
+
+    }catch(e){
+      print(e);
+    }
+  }
 
 }
