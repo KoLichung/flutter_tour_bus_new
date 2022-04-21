@@ -9,7 +9,10 @@ class Order {
   String? destinationCity;
   int? orderMoney;
   int? depositMoney;
+  String? memo;
   String? busTitle;
+  String? name;
+  String? phone;
 
   Order(
       {this.id,
@@ -22,7 +25,10 @@ class Order {
         this.destinationCity,
         this.orderMoney,
         this.depositMoney,
-        this.busTitle});
+        this.memo,
+        this.busTitle,
+        this.name,
+        this.phone});
 
   Order.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -35,7 +41,10 @@ class Order {
     destinationCity = json['destinationCity'];
     orderMoney = json['orderMoney'];
     depositMoney = json['depositMoney'];
+    memo = json['memo'];
     busTitle = json['busTitle'];
+    name = json['name'];
+    phone = json['phone'];
   }
 
   Map<String, dynamic> toJson() {
@@ -50,7 +59,10 @@ class Order {
     data['destinationCity'] = this.destinationCity;
     data['orderMoney'] = this.orderMoney;
     data['depositMoney'] = this.depositMoney;
+    data['memo'] = this.memo;
     data['busTitle'] = this.busTitle;
+    data['name'] = this.name;
+    data['phone'] = this.phone;
     return data;
   }
 }

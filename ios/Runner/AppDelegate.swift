@@ -40,7 +40,7 @@ enum MyFlutterErrorCode {
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         GeneratedPluginRegistrant.register(with: self)
-        ECPayPaymentGatewayManager.sharedInstance().initialize(env: .Prod)
+        ECPayPaymentGatewayManager.sharedInstance().initialize(env: .Stage)
 
         guard let controller = window?.rootViewController as? FlutterViewController else {
           fatalError("rootViewController is not type FlutterViewController")

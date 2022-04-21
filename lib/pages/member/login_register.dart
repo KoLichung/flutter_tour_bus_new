@@ -91,45 +91,86 @@ class _LoginRegisterState extends State<LoginRegister> {
                 Navigator.pushNamed(context, '/register_phone').then((value){
                   var userModel = context.read<UserModel>();
                   if(userModel.user != null){
-                    Navigator.pop(context);
+                    Navigator.pop(context,"ok");
                   }
                 });
               },
             ),
-            const Divider(
-              height: 30,
-              color: Colors.black87,
-              indent: 30,
-              endIndent: 30,
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 30),
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      primary: const Color(0xFF00B900),
-                      elevation: 0
-                  ),
-                  onPressed: (){
-                    _lineSignIn(context);
-                  },
-                  child: Container(
-                    height: 46,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(flex:1, child:Container(
-                          margin: const EdgeInsets.only(left: 10),
-                          alignment: Alignment.centerLeft,
-                          width: 40,
-                          child: const Icon(FontAwesomeIcons.line),
-                        )),
-                        Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
-                        Expanded(flex:1, child:Container()),
-                      ],
+
+            Consumer<UserModel>(builder: (context, userModel, child) =>
+                (userModel.platformType=="android")?
+                Container():
+                Column(
+                  children: [
+                    const Divider(
+                      height: 30,
+                      color: Colors.black87,
+                      indent: 30,
+                      endIndent: 30,
                     ),
-                  )),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 30),
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: const Color(0xFF00B900),
+                              elevation: 0
+                          ),
+                          onPressed: (){
+                            print("line button pressed");
+                            _lineSignIn(context);
+                          },
+                          child: Container(
+                            height: 46,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(flex:1, child:Container(
+                                  margin: const EdgeInsets.only(left: 10),
+                                  alignment: Alignment.centerLeft,
+                                  width: 40,
+                                  child: const Icon(FontAwesomeIcons.line),
+                                )),
+                                Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
+                                Expanded(flex:1, child:Container()),
+                              ],
+                            ),
+                          )
+                      ),
+                    )
+                  ],
+                )
             ),
+            // Container(
+            //   margin: const EdgeInsets.symmetric(horizontal: 30),
+            //   child: ElevatedButton(
+            //       style: ElevatedButton.styleFrom(
+            //           primary: const Color(0xFF00B900),
+            //           elevation: 0
+            //       ),
+            //       onPressed: (){
+            //         print("line button pressed");
+            //         _lineSignIn(context);
+            //       },
+            //       child: Container(
+            //         height: 46,
+            //         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+            //         child: Row(
+            //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //           children: [
+            //             Expanded(flex:1, child:Container(
+            //               margin: const EdgeInsets.only(left: 10),
+            //               alignment: Alignment.centerLeft,
+            //               width: 40,
+            //               child: const Icon(FontAwesomeIcons.line),
+            //             )),
+            //             Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
+            //             Expanded(flex:1, child:Container()),
+            //           ],
+            //         ),
+            //       )
+            //   ),
+            // ),
           ],
         ));
   }
@@ -182,12 +223,16 @@ class _LoginRegisterState extends State<LoginRegister> {
 
   Future<void> _lineSignIn(BuildContext context) async {
     try {
+      print("trying to line login");
       final result = await LineSDK.instance.login();
 
       String lineId = result.userProfile!.userId;
       String displayName = result.userProfile!.displayName;
 
+      print("lineId $lineId");
+
       String? token = await _getUserTokenFromLine(lineId);
+      print("userToken $token");
 
       if(token != null){
         User? user = await _getUserData(token);
@@ -290,12 +335,14 @@ class _LoginRegisterState extends State<LoginRegister> {
       print(deviceID);
       userModel.deviceId = deviceID;
       userModel.platformType = 'ios';
+      setState(() {});
     } else {
       var androidDeviceInfo = await deviceInfo.androidInfo;
       String deviceID =  androidDeviceInfo.androidId!;
       print(deviceID);
       userModel.deviceId = deviceID;
       userModel.platformType = 'android';
+      setState(() {});
     }
   }
 

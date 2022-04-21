@@ -108,9 +108,9 @@ class _SearchListState extends State<SearchList> {
                       width: 100,
                     ),
                     title:
-                    (busResult[i].isTop!)?
-                    Text('${busResult[i].title!} 置頂車輛', style: Theme.of(context).textTheme.subtitle2,)
-                    :
+                    // (busResult[i].isTop!)?
+                    // Text('${busResult[i].title!} 置頂車輛', style: Theme.of(context).textTheme.subtitle2,)
+                    // :
                     Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
                     // subtitle:RichText(
                     //     text: TextSpan(text: busResult[i].vehicalBodyNumber,
@@ -187,11 +187,11 @@ class _SearchListState extends State<SearchList> {
     String path = Service.SEARCH_BUS;
     try {
       final response = await http.get(Service.standard(path: path, queryParameters: {
-        'departure_city_id':'1',
-        'destination_city_id':'2',
-        'startDate':'20220309',
-        'endtDate':'20220310',
-        'numberOfPeople':'25'
+        'departure_city_id': City.getCityFromName(widget.fromCity).id.toString(),
+        'destination_city_id':City.getCityFromName(widget.toCity).id.toString(),
+        'startDate': DateFormat('yyyyMMdd').format(widget.startDate),
+        'endtDate':DateFormat('yyyyMMdd').format(widget.endDate),
+        'numberOfPeople': widget.numberOfPeople,
       }));
       // print(response.body);
 

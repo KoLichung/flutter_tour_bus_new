@@ -129,7 +129,7 @@ class MyApp extends StatelessWidget {
         // '/edit_bus_profile': (context) => const EditBusProfile(),
         // '/drivers_bus_detail': (context) => const DriversBusDetail(),
         '/drivers_booking_list': (context) => const DriversBookingList(),
-        '/drivers_booking_detail': (context) => const DriversBookingDetail(),
+        // '/drivers_booking_detail': (context) => const DriversBookingDetail(),
 
       },
       builder: (context, child){

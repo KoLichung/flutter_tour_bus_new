@@ -15,6 +15,11 @@ class Service{
   static const PATH_USER_UPDATE_PASSWORD = '/api/user/update_user_password';
 
   static const ORDERS = '/api/orders/';
+  static const OWNER_BUS_ORDERS = '/api/owner_orders';
+  static const OWNER_UPDATE_STATE = '/api/owner_update_state';
+  static const OWNER_UPDATE_MEMO = '/api/owner_update_memo';
+  static const GET_ORDER_IMAGE = '/api/get_order_image';
+
   static const ANNOUNCEMENT = '/api/announcements/';
 
   static const PATH_GET_SMS_VERIFY = '/api/sms_verify';

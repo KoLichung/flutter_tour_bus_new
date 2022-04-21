@@ -2,8 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/pages/member/bookings/drivers_booking_detail.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_outlined_text.dart';
+import 'package:provider/provider.dart';
 
+import '../../../models/order.dart';
+import '../../../notifier_model/user_model.dart';
+import 'package:flutter_tour_bus_new/constant.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 
 class DriversBookingList extends StatefulWidget {
@@ -15,101 +23,209 @@ class DriversBookingList extends StatefulWidget {
 
 class _DriversBookingListState extends State<DriversBookingList> {
 
-  List<FakeOrderHistory> fakeOrderList = [
-    FakeOrderHistory(passengerName: '王小明',passengerPhoneNumber: '0912345678',issuedate: '2021-12-31', fromCity: '新竹', toCity: '台東',busType:'20人座遊覽車', startDate:'2022-01-06', endDate:'2022-01-09', agentName: '長興旅行社', price: '8000'),
-    FakeOrderHistory(passengerName: '陳小明',passengerPhoneNumber: '0912345678',issuedate: '2021-12-31', fromCity: '台南', toCity: '高雄',busType:'30人座遊覽車', startDate:'2022-02-06', endDate:'2022-02-09', agentName: '長興旅行社', price: '5000'),
-  ];
+  List<Order> ownerOrderList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _httpGetOwnerOrderList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    var userModel = context.read<UserModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('業主訂單列表'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: () {},
-              child:
-              const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],),
-      body: Column(
-        children: [
-          ListView.builder(
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(16.0),
+        //     child: GestureDetector(
+        //       onTap: () {},
+        //       child:
+        //       const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],
+      ),
+      body: ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: fakeOrderList.length,
+              itemCount: ownerOrderList.length,
               itemBuilder:(BuildContext context,int i){
                 return  Column(
                   children: [
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-                      trailing: PassengerOrderStatus.pending(context),
-                      title: Text(fakeOrderList[i].issuedate),
-                      subtitle:
-                      Text('${fakeOrderList[i].passengerName} ${fakeOrderList[i].passengerPhoneNumber} \n名稱：${fakeOrderList[i].busType} \n租車日期： ${fakeOrderList[i].startDate}~${fakeOrderList[i].endDate} \n出發地：${fakeOrderList[i].fromCity} 目的地：${fakeOrderList[i].toCity}',style: Theme.of(context).textTheme.bodyText2,),
-                    onTap: (){
-                        Navigator.pushNamed(context, '/drivers_booking_detail');
-
+                      trailing: _getOrderStatusButton(userModel.token!, ownerOrderList[i], context),
+                      // title: Text(ownerOrderList[i].d),
+                      title:
+                      Text('${ownerOrderList[i].name} ${ownerOrderList[i].phone} \n名稱：${ownerOrderList[i].busTitle} \n'
+                          '租車日期： ${DateFormat("yyyy-MM-dd").format(DateTime.parse(ownerOrderList[i].startDate!))}~${DateFormat("yyyy-MM-dd").format(DateTime.parse(ownerOrderList[i].endDate!))} \n'
+                          '出發地：${ownerOrderList[i].depatureCity} 目的地：${ownerOrderList[i].destinationCity}'
+                        ,style: Theme.of(context).textTheme.bodyText2,),
+                    onTap: () async {
+                      final result = await Navigator.push(
+                          context, MaterialPageRoute(
+                            builder: (context) => DriversBookingDetail(theOrder: ownerOrderList[i]),
+                        )
+                      );
+                      if(result=="ok"){
+                        _httpGetOwnerOrderList();
+                      }
+                        // Navigator.pushNamed(context, '/drivers_booking_detail');
                     },
                     ),
                     const Divider(color: AppColor.lightGrey,)],);
-              }),],
-      ),
-    );
+              }),
+      );
   }
+
+  Widget _getOrderStatusButton(String userToken, Order order, BuildContext context){
+    PassengerOrderStatus orderStatus = PassengerOrderStatus(userToken,order.id);
+    if(order.state=="waitOwnerCheck"){
+      return orderStatus.pending(context, (){
+        showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              titlePadding: const EdgeInsets.all(0),
+              title: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: AppColor.yellow,
+                  child: const Text('是否接單?',style: TextStyle(color: Colors.white, fontSize: 18),)),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                      _httpPostUpdateOrderState(userToken, order.id!, "waitForDeposit");
+                      Navigator.pop(context,"confirm");
+                    },
+                    child:const CustomOutlinedText(
+                        title: '接單',
+                        color: AppColor.grey),
+                  ),
+                  GestureDetector(
+                    onTap: (){
+                      _httpPostUpdateOrderState(userToken, order.id!, "ownerCanceled");
+                      Navigator.pop(context,"confirm");
+                    },
+                    child: const CustomOutlinedText(
+                        title: '不接單',
+                        color: AppColor.grey),
+                  )
+                ],
+              ),
+            )
+        );
+      });
+    }else if(order.state=="ownerCanceled"){
+      return orderStatus.decline();
+    }else if(order.state=="waitForDeposit"){
+      return orderStatus.waitingForPayment(context);
+    }else if(order.state=="ownerWillContact"){
+      return orderStatus.confirmed(context, (){
+        showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              titlePadding: const EdgeInsets.all(0),
+              title: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: AppColor.yellow,
+                  child: const Text('是否已完成?',style: TextStyle(color: Colors.white, fontSize: 18),)),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                      _httpPostUpdateOrderState(userToken, order.id!, "closed");
+                      Navigator.pop(context,"confirm");
+                    },
+                    child:const CustomOutlinedText(
+                        title: '完成出車',
+                        color: AppColor.grey),
+                  ),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.pop(context,"confirm");
+                    },
+                    child: const CustomOutlinedText(
+                        title: '尚未出車',
+                        color: AppColor.grey),
+                  )
+                ],
+              ),
+            )
+        );
+      });
+    }else if(order.state=="closed"){
+      return orderStatus.complete();
+    }
+
+    return orderStatus.decline();
+  }
+
+  Future _httpGetOwnerOrderList() async {
+    var userModel = context.read<UserModel>();
+    String path = Service.OWNER_BUS_ORDERS;
+    try {
+      final response = await http.get(Service.standard(path: path),
+        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8', 'Authorization': 'token ${userModel.token!}'},
+      );
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        List<dynamic> parsedListJson = json.decode(utf8.decode(response.body.runes.toList()));
+        List<Order> data = List<Order>.from(parsedListJson.map((i) => Order.fromJson(i)));
+        // print(data[0].title);
+        // print(data[1].city);
+        ownerOrderList = data;
+        // print(orderList);
+
+        setState(() {});
+
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _httpPostUpdateOrderState(String userToken, int orderId, String state) async {
+
+    String path = Service.OWNER_UPDATE_STATE;
+    try {
+      final bodyParams = {
+        "state": state,
+        "order_id": orderId.toString(),
+      };
+
+      final response = await http.post(Service.standard(path: path),
+        headers: <String, String>{
+          'Authorization': 'token $userToken'
+        },
+        body: bodyParams,
+      );
+
+      if (response.statusCode == 200) {
+        print("success update order state");
+        _httpGetOwnerOrderList();
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
 }
 
-class FakeOrderHistory{
-  String busType;
-  String startDate;
-  String endDate;
-  String agentName;
-  String price;
-  String passengerName;
-  String passengerPhoneNumber;
-  String fromCity;
-  String toCity;
-  String issuedate;
-
-  FakeOrderHistory({
-    required this.busType,
-    required this.startDate,
-    required this.endDate,
-    required this.agentName,
-    required this.price,
-    required this.passengerName,
-    required this.toCity,
-    required this.fromCity,
-    required this.passengerPhoneNumber,
-    required this.issuedate
-  });
-
-}
 
 class PassengerOrderStatus {
 
-  static pending(context){
+  String? userToken;
+  int? orderId;
+
+  PassengerOrderStatus(this.userToken,this.orderId);
+
+  pending(context, onTap){
     return GestureDetector(
-      onTap: ()=>showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            titlePadding: const EdgeInsets.all(0),
-            title: Container(
-                padding: const EdgeInsets.all(10),
-                color: AppColor.yellow,
-                child: const Text('是否接單?',style: TextStyle(color: Colors.white, fontSize: 18),)),
-            content: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                CustomOutlinedText(
-                    title: '接單',
-                    color: AppColor.grey),
-                CustomOutlinedText(
-                    title: '不接單',
-                    color: AppColor.grey),
-              ],
-            ),
-          )),
+      onTap: onTap,
       child: const CustomOutlinedText(
         color: AppColor.pending,
         title: '是否接訂',
@@ -117,31 +233,35 @@ class PassengerOrderStatus {
     );
   }
 
-  static decline(){
+  decline(){
     return const CustomOutlinedText(
         title: '不接訂',
         color: AppColor.decline);
   }
 
-  static waitingForPayment(context){
+  waitingForPayment(context){
     return const CustomOutlinedText(
-        title: '接訂，等待消費者付款',
+        title: '接訂\n等待付款',
         color: AppColor.waiting);
   }
 
-  static confirmed(){
-    return const CustomOutlinedText(
-        title: '消費者已付款，儘速接洽',
-        color: AppColor.waiting);
+  confirmed(context, onTap){
+    return GestureDetector(
+      onTap: onTap,
+      child: const CustomOutlinedText(
+        color: AppColor.waiting,
+        title: '已付款請出車\n按我結單',
+      ),
+    );
   }
 
-  static onGoing(){
-    return const CustomOutlinedText(
-        title: '租借中',
-        color: AppColor.onGoing);
-  }
+  // onGoing(){
+  //   return const CustomOutlinedText(
+  //       title: '租借中',
+  //       color: AppColor.onGoing);
+  // }
 
-  static complete(){
+  complete(){
     return const CustomOutlinedText(
         title: '已結單',
         color: AppColor.yellow);

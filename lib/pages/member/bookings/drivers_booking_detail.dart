@@ -1,12 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
-import 'package:flutter_tour_bus_new/widgets/custom_big_outlined_button.dart';
-import 'package:flutter_tour_bus_new/widgets/custom_outlined_text.dart';
+import 'package:flutter_tour_bus_new/constant.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import '../../../models/order.dart';
+import 'package:intl/intl.dart';
+
+import '../../../notifier_model/user_model.dart';
 
 class DriversBookingDetail extends StatefulWidget {
-  const DriversBookingDetail({Key? key}) : super(key: key);
+  final Order theOrder;
+
+  const DriversBookingDetail({Key? key, required this.theOrder}) : super(key: key);
 
   @override
   State<DriversBookingDetail> createState() => _DriversBookingDetailState();
@@ -14,23 +23,29 @@ class DriversBookingDetail extends StatefulWidget {
 
 class _DriversBookingDetailState extends State<DriversBookingDetail> {
 
-  List<FakeOrderHistory> fakeOrderList = [
-    FakeOrderHistory(passengerName: '王小明',passengerPhoneNumber: '0912345678',issuedate: '2021-12-31', fromCity: '新竹', toCity: '台東',busType:'20人座遊覽車', startDate:'2022-01-06', endDate:'2022-01-09', agentName: '長興旅行社', price: '8000'),
-    FakeOrderHistory(passengerName: '陳小明',passengerPhoneNumber: '0912345678',issuedate: '2021-12-31', fromCity: '台南', toCity: '高雄',busType:'30人座遊覽車', startDate:'2022-02-06', endDate:'2022-02-09', agentName: '長興旅行社', price: '5000'),
-  ];
+  String imageUrl='';
+  TextEditingController memoController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _httpGetBusImageLink(widget.theOrder.id!);
+    memoController.text = widget.theOrder.memo!;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('訂單詳細'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GestureDetector(
-              onTap: () {},
-              child:
-              const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],),
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.all(16.0),
+        //     child: GestureDetector(
+        //       onTap: () {},
+        //       child:
+        //       const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],
+    ),
       body: Column(
         children: [
           Container(
@@ -38,30 +53,29 @@ class _DriversBookingDetailState extends State<DriversBookingDetail> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                (imageUrl!="")?
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       margin: const EdgeInsets.only(right: 10),
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image:AssetImage('images/tour_bus.jpeg',),
-                            fit:BoxFit.fill),),
-                      height: 75,
-                      width: 75,
+                      child: Image.network(imageUrl,fit: BoxFit.cover,),
+                      height: 100,
+                      width: 100,
                     ),
-                    GestureDetector(
-                      child: CustomOutlinedText(title: '未處理', color: AppColor.pending),
-                      onTap: (){},),
-                    const Text('(點擊左方按鈕可以修改狀態)',style: TextStyle(color: AppColor.lightGrey,fontSize: 14),),
+                    // GestureDetector(
+                    //   child: CustomOutlinedText(title: '未處理', color: AppColor.pending),
+                    //   onTap: (){},),
+                    // const Text('(點擊左方按鈕可以修改狀態)',style: TextStyle(color: AppColor.lightGrey,fontSize: 14),),
                   ],
-                ),
+                ):
+                Container(),
                 const Text('訂單成立時間：'),
-                Text('租車日期：${fakeOrderList[0].startDate} ~ ${fakeOrderList[0].endDate}'),
-                Text('車輛名稱：${fakeOrderList[0].busType}'),
-                Text('出發地：${fakeOrderList[0].fromCity}    目的地：${fakeOrderList[0].toCity}'),
-                Text('承租人：${fakeOrderList[0].passengerName}'),
-                Text('車輛名稱：${fakeOrderList[0].passengerPhoneNumber}'),
+                Text('租車日期：${DateFormat("yyyy-MM-dd").format(DateTime.parse(widget.theOrder.startDate!))}~${DateFormat("yyyy-MM-dd").format(DateTime.parse(widget.theOrder.endDate!))}'),
+                Text('車輛名稱：${widget.theOrder.busTitle}'),
+                Text('出發地：${widget.theOrder.depatureCity}    目的地：${widget.theOrder.destinationCity}'),
+                Text('承租人：${widget.theOrder.name}'),
+                Text('承租人電話：${widget.theOrder.phone}'),
                 const Text('備註：'),
                 Container(
                   margin: EdgeInsets.only(top: 10),
@@ -73,17 +87,17 @@ class _DriversBookingDetailState extends State<DriversBookingDetail> {
                     borderRadius: BorderRadius.circular(4),
                   ),
 
-                  child: const TextField(
+                  child: TextField(
                     keyboardType: TextInputType.multiline,
                     maxLines: 6,
-                    decoration: InputDecoration(
+                    controller: memoController,
+                    decoration: const InputDecoration(
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 10,vertical: 10)
-
                     ),
 
                   ),
@@ -93,43 +107,67 @@ class _DriversBookingDetailState extends State<DriversBookingDetail> {
           ),
           CustomElevatedButton(
             color: AppColor.yellow,
-            title:'確定修改',
-            onPressed: (){},),
-
-
-
+            title:'確定修改備註',
+            onPressed: (){
+              var userModel = context.read<UserModel>();
+              _httpPostUpdateOrderMemo(userModel.token!, widget.theOrder.id!, memoController.text);
+            }),
 
         ],
       ),
     );
   }
+
+  Future _httpGetBusImageLink(int orderId) async {
+    String path = Service.GET_ORDER_IMAGE;
+    try {
+      final queryParams = {
+        "order_id":orderId.toString(),
+      };
+
+      final response = await http.get(Service.standard(path: path,queryParameters: queryParams));
+
+      if (response.statusCode == 200) {
+        // print(response.body);
+        Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+        print(map['image']);
+
+        imageUrl = Service.standard(path: map['image']).toString();
+        setState(() {});
+
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future _httpPostUpdateOrderMemo(String userToken, int orderId, String memo) async {
+
+    String path = Service.OWNER_UPDATE_MEMO;
+    try {
+      final bodyParams = {
+        "memo": memo,
+        "order_id": orderId.toString(),
+      };
+
+      final response = await http.post(Service.standard(path: path),
+        headers: <String, String>{
+          'Authorization': 'token $userToken'
+        },
+        body: bodyParams,
+      );
+
+      print(response.body);
+      if (response.statusCode == 200) {
+        print("success update order memo");
+        Navigator.pop(context,"ok");
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
 }
 
-class FakeOrderHistory{
-  String busType;
-  String startDate;
-  String endDate;
-  String agentName;
-  String price;
-  String passengerName;
-  String passengerPhoneNumber;
-  String fromCity;
-  String toCity;
-  String issuedate;
-
-  FakeOrderHistory({
-    required this.busType,
-    required this.startDate,
-    required this.endDate,
-    required this.agentName,
-    required this.price,
-    required this.passengerName,
-    required this.toCity,
-    required this.fromCity,
-    required this.passengerPhoneNumber,
-    required this.issuedate
-  });
-
-}
 
 

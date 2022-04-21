@@ -328,7 +328,7 @@ class _DriversBusDetailState extends State<DriversBusDetail> {
 
       final queryParameters = {
         // "bus_id" : busId.toString(),
-        "bus_id" : "15",
+        "bus_id" : busId.toString(),
       };
 
       final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));

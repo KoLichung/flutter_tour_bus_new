@@ -79,7 +79,7 @@ public class MainActivity extends FlutterActivity {
     private ExampleData mExampleData;
 
     private Activity mActivity;
-    private ServerType serverType = ServerType.Prod;
+    private ServerType serverType = ServerType.Stage;
     private String theToken = "";
 
 //    private MainActivityBinding binding;

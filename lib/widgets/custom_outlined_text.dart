@@ -11,8 +11,8 @@ class CustomOutlinedText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
-      child: Text(title,style: TextStyle(color: color),),
+      padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 0),
+      child: (title.length<6)?Text(title,style: TextStyle(color: color)):Text(title,style: TextStyle(color: color, fontSize: 14)),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
         border: Border.all(

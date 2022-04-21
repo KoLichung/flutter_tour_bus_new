@@ -22,7 +22,7 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
 
   List<Order> orderList =[];
 
-  PassengerOrderStatus orderStatus = PassengerOrderStatus();
+  // PassengerOrderStatus orderStatus = PassengerOrderStatus();
 
   static const EventChannel paymentCallBackChannel = EventChannel('samples.flutter.io/pay_ec_pay_call_back');
 
@@ -75,7 +75,7 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
                   children: [
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-                      trailing: orderStatus.waitingForPayment(context),
+                      trailing: _getOrderStatusButton(orderList[i],context),
                       // trailing: Text(orderList[i].state), //要判斷state內容顯示不同的(外框文字)狀態
                       title: Text('名稱：${orderList[i].busTitle!}'),
                       subtitle: Text('車錢：\$${orderList[i].orderMoney!}  訂金：${orderList[i].depositMoney!}  \n租車日期： $startDate~$endDate'),
@@ -84,6 +84,25 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
               }),],
       ),
     );
+  }
+
+  Widget _getOrderStatusButton(Order order, BuildContext context){
+    PassengerOrderStatus orderStatus = PassengerOrderStatus(order.id);
+    if(order.state=="waitOwnerCheck"){
+      return orderStatus.pending();
+    }else if(order.state=="ownerCanceled"){
+      return orderStatus.decline();
+    }else if(order.state=="waitForDeposit"){
+      return orderStatus.waitingForPayment(context);
+    }else if(order.state=="waitForAtmDeposit"){
+      return orderStatus.waitingForATM(context);
+    }else if(order.state=="ownerWillContact"){
+      return orderStatus.confirmed();
+    }else if(order.state=="closed"){
+      return orderStatus.complete();
+    }
+
+    return orderStatus.pending();
   }
 
   Future _fetchOrderList() async {
@@ -118,6 +137,9 @@ class PassengerOrderStatus {
   static const MethodChannel methodPayChannel = MethodChannel('samples.flutter.io/pay_ec_pay');
 
   String token = "";
+  int? orderId;
+
+  PassengerOrderStatus(this.orderId);
 
   Future<void> _getTestToken() async {
     String message;
@@ -153,19 +175,19 @@ class PassengerOrderStatus {
   pending(){
     return const CustomOutlinedText(
       color: AppColor.grey,
-      title: '等待業者確認訂單');
+      title: '等待業者\n確認訂單');
   }
 
   decline(){
     return const CustomOutlinedText(
         color: AppColor.decline,
-        title: '業者無法接單');
+        title: '業者\n無法接單');
   }
 
   waitingForPayment(context){
     return GestureDetector(
       onTap: (){
-        _fetchPaymentToken(context,1);
+        _fetchPaymentToken(context,orderId!);
         // _getTestToken();
 
         // _payECPay();
@@ -176,10 +198,21 @@ class PassengerOrderStatus {
     );
   }
 
+  waitingForATM(context){
+    return GestureDetector(
+      onTap: (){
+
+      },
+      child: const CustomOutlinedText(
+          color: AppColor.pending,
+          title: '等待\nATM轉帳'),
+    );
+  }
+
   confirmed(){
     return const CustomOutlinedText(
         color: AppColor.waiting,
-        title: '收訂，業者會接洽您');
+        title: '收訂，業者\n會接洽您');
 
   }
 

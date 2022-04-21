@@ -64,8 +64,11 @@ class _MemberPageState extends State<MemberPage> {
                       style: TextStyle(fontSize: 20),),
                   ),
                   ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login_register');
+                      onPressed: () async {
+                         final result = await Navigator.pushNamed(context, '/login_register');
+                         if(result=="ok"){
+                           _httpGetAnnouncements();
+                         }
                       },
                       child: const Text('登入', style: TextStyle(fontSize: 16)),
                       style: ElevatedButton.styleFrom(
