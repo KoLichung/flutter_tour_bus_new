@@ -10,7 +10,7 @@
         android:theme="@style/AppTheme"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
-        tools:replace="android:allowBackup"
+        tools:replace="allowBackup"
        >
         <activity
             android:name=".MainActivity"
