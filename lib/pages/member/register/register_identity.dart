@@ -32,6 +32,8 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
 
   bool driverFormIsVisible = false;
 
+  bool isOwnerAgreementChecked = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,10 +76,17 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
                 onPressed: (){
                   // Navigator.popUntil(context, ModalRoute.withName('/login_register'));
 
-                  if(_userIdentity == UserIdentity.passenger){
-                    User user = User(name: userNameController.text, phone: widget.phone);
-                    _postCreateUser(user, pwdTextController.text);
+                  if(isOwnerAgreementChecked){
+
+                    if(_userIdentity == UserIdentity.passenger){
+                      User user = User(name: userNameController.text, phone: widget.phone);
+                      _postCreateUser(user, pwdTextController.text);
+                    }
+
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("您尚未同意瀏覽車業者規範！"),));
                   }
+
                 },
               ),
               const SizedBox(height: 20,),
@@ -133,30 +142,45 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
                   alignment:Alignment.centerLeft,
                   child: Text('* 業主資訊')),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                        primary: AppColor.yellow,
-                        elevation: 0
-                    ),
-                    child: const SizedBox(
-                      height: 40,
-                      width: 80,
-                      child: Align(
-                        child: Text(
-                          '業主規範',
-                          style: TextStyle(fontSize: 16),),
-                        alignment: Alignment.center,
-                      ),
-                    )
-
-                ),
-                const Text('  (請點入並同意規範)'),
-              ],
-            ),
+            Row(children: [
+              Checkbox(
+                  visualDensity: const VisualDensity(
+                    horizontal: VisualDensity.minimumDensity,
+                  ),
+                  value: isOwnerAgreementChecked,
+                  onChanged: (bool? value){
+                    setState(() {
+                      isOwnerAgreementChecked = value!;
+                    });
+                  }),
+              const Text('我同意下列遊覽車業者規範：')
+            ],),
+            const Text('在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。'),
+            const SizedBox(height: 10,),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.start,
+            //   children: [
+            //     ElevatedButton(
+            //         onPressed: () {},
+            //         style: ElevatedButton.styleFrom(
+            //             primary: AppColor.yellow,
+            //             elevation: 0
+            //         ),
+            //         child: const SizedBox(
+            //           height: 40,
+            //           width: 80,
+            //           child: Align(
+            //             child: Text(
+            //               '業主規範',
+            //               style: TextStyle(fontSize: 16),),
+            //             alignment: Alignment.center,
+            //           ),
+            //         )
+            //
+            //     ),
+            //     const Text('  (請點入並同意規範)'),
+            //   ],
+            // ),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 10),
               child: Row(children: [
@@ -192,14 +216,14 @@ class _RegisterIdentityState extends State<RegisterIdentity> {
               const SizedBox(width: 20,),
               OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(
+                    side: const BorderSide(
                       color: AppColor.grey,
                       width: 1.0,
                       style: BorderStyle.solid,
                     ),
                   ),
                   onPressed: null,
-                  child: Icon(Icons.photo_camera_outlined)),
+                  child: const Icon(Icons.photo_camera_outlined)),
               ]),
         ],
     ),

@@ -52,7 +52,7 @@ class _LoginRegisterState extends State<LoginRegister> {
               height: 100,
               decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image:AssetImage('images/app_icon.png'),
+                    image:AssetImage('images/appIcon_tour_bus.png'),
                   )
               ),
             ),

@@ -35,4 +35,6 @@ class Service{
     return Uri.http(_HOST, '$path', queryParameters);
   }
 
+  static const BUS_COMPANY_NAME = 'XX有限公司';
+
 }

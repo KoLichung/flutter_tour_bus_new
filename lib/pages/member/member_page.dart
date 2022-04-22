@@ -12,6 +12,7 @@ import 'package:flutter_tour_bus_new/notifier_model/user_model.dart';
 import 'login_register.dart';
 import 'package:flutter_tour_bus_new/constant.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 
 class MemberPage extends StatefulWidget {
@@ -129,6 +130,42 @@ class _MemberPageState extends State<MemberPage> {
                         icon: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                       ),),]),
             ),
+            const Divider(
+              color: Color(0xffe5e5e5),
+              thickness: 1,
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 0),
+              child: Row(
+                  children:[
+                    const Expanded(flex:4,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 30.0),
+                          child: Text('管理員LINE客服'),
+                        )),
+                    const Expanded(
+                        flex: 3,
+                        child: SizedBox()
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: IconButton(
+                        constraints: const BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+
+                            const url = 'https://page.line.me/501weppt';
+                            if (await canLaunch(url)) {
+                              await launch(url);
+                            } else {
+                              throw 'Could not launch $url';
+                            }
+                        },
+                        icon: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                      ),),]),
+            ),
+
             Consumer<UserModel>(builder: (context, userModel, child) => (userModel.isLogin() && userModel.user!.isOwner!) ?
               Column(
                 children: [
@@ -223,7 +260,8 @@ class _MemberPageState extends State<MemberPage> {
                 color: AppColor.lightGrey
             )
                 : const SizedBox()
-            )
+            ),
+
 
           ],
         ),
