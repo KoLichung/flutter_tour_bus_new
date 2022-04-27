@@ -19,6 +19,7 @@ class Service{
   static const OWNER_UPDATE_STATE = '/api/owner_update_state';
   static const OWNER_UPDATE_MEMO = '/api/owner_update_memo';
   static const GET_ORDER_IMAGE = '/api/get_order_image';
+  static const GET_ORDER_USER_INFO = '/api/get_order_user_info';
 
   static const ANNOUNCEMENT = '/api/announcements/';
 

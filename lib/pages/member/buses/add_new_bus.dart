@@ -94,7 +94,7 @@ class _AddNewBusState extends State<AddNewBus> {
                   ImageUploadButton(
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
-                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
 
                         if(pickedFile == null) return;
 
@@ -149,6 +149,7 @@ class _AddNewBusState extends State<AddNewBus> {
                           // source: ImageSource.gallery,
                           // maxWidth: maxWidth,
                           // maxHeight: maxHeight,
+                          maxWidth: 640,
                         );
 
                         if(pickedFile == null) return;
@@ -233,6 +234,7 @@ class _AddNewBusState extends State<AddNewBus> {
                           // source: ImageSource.gallery,
                           // maxWidth: maxWidth,
                           // maxHeight: maxHeight,
+                          maxWidth: 640,
                         );
 
                         if(pickedFile == null) return;
@@ -314,7 +316,7 @@ class _AddNewBusState extends State<AddNewBus> {
 
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
-                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
 
                         if(pickedFile == null) return;
 

@@ -79,9 +79,11 @@ enum MyFlutterErrorCode {
           }
           let myArgs = args as? [String: Any]
           let token = myArgs?["token"] as? String
+          let orderId = myArgs?["orderId"] as? String
+          let tourBus = myArgs?["tourBus"] as? String
             
             
-          self?.receivePayECPay(token: token!)
+          self?.receivePayECPay(token: token!, orderId: orderId!, tourBus: tourBus!)
         })
 
         let navigationController = UINavigationController(rootViewController: controller)
@@ -131,7 +133,7 @@ enum MyFlutterErrorCode {
       result(Int(device.batteryLevel * 100))
     }
 
-    private func receivePayECPay(token: String) {
+    private func receivePayECPay(token: String, orderId: String, tourBus: String) {
         print("here")
   //      self.mainCoordinator?.start()
         
@@ -147,84 +149,106 @@ enum MyFlutterErrorCode {
   //                print("")
             
             
-             if state.callbackStateStatus == .Success {
-                 // watch here!!!!
-                 self.eventSink!("success");
-             }else if(state.callbackStateStatus == .Fail){
-                 self.eventSink!("fail");
-             }else if(state.callbackStateStatus == .Cancel){
-                 self.eventSink!("cancel")
-             }else if(state.callbackStateStatus == .Exit){
-                 self.eventSink!("exit")
-             }
+//             if state.callbackStateStatus == .Success {
+//                 // watch here!!!!
+//                 self.eventSink!("success");
+//             }else if(state.callbackStateStatus == .Fail){
+//                 self.eventSink!("fail");
+//             }else if(state.callbackStateStatus == .Cancel){
+//                 self.eventSink!("cancel")
+//             }else if(state.callbackStateStatus == .Exit){
+//                 self.eventSink!("exit")
+//             }
             
             
-//            if let callbackState = state as? CreatePaymentCallbackState {
-//
-//                print("CreatePaymentCallbackState:")
-//                print("RtnCode = \(callbackState.RtnCode)")
-//                print("RtnMsg = \(callbackState.RtnMsg)")
-//
-//                if let order = callbackState.OrderInfo {
-//                    print("\(order)")
-//                    print("\(order.MerchantTradeNo ?? "")")
-//                    print("\(order.TradeNo ?? "")")
-//                    print("\(order.TradeDate)")
-//                    print("\(order.TradeStatus ?? "")")
-//                    print("\(order.PaymentDate)")
-//                    print("\(order.TradeAmt ?? 0)")
-//                    print("\(order.PaymentType ?? "")")
-//                    print("\(order.ChargeFee ?? 0)")
-//                    print("\(order.TradeStatus ?? "")")
-//
-//                }
-//                if let card = callbackState.CardInfo {
-//                    print("\(card)")
-//                    print("\(card.AuthCode ?? "")")
-//                    print("\(card.Gwsr ?? "")")
-//                    print("\(card.ProcessDate)")
-//                    print("\(card.Stage ?? 0)")
-//                    print("\(card.Stast ?? 0)")
-//                    print("\(card.Staed ?? 0)")
-//                    print("\(card.Amount ?? 0)")
-//                    print("\(card.Eci ?? 0)")
-//                    print("\(card.Card6No ?? "")")
-//                    print("\(card.Card4No ?? "")")
-//                    print("\(card.RedDan ?? 0)")
-//                    print("\(card.RedDeAmt ?? 0)")
-//                    print("\(card.RedOkAmt ?? 0)")
-//                    print("\(card.RedYet ?? 0)")
-//                    print("\(card.PeriodType ?? "")")
-//                    print("\(card.Frequency ?? 0)")
-//                    print("\(card.ExecTimes ?? 0)")
-//                    print("\(card.PeriodAmount ?? 0)")
-//                    print("\(card.TotalSuccessTimes ?? 0)")
-//                    print("\(card.TotalSuccessAmount ?? 0)")
-//                }
-//                if let atm = callbackState.ATMInfo {
-//                    print("\(atm)")
-//                    print("\(atm.BankCode ?? "")")
-//                    print("\(atm.vAccount ?? "")")
-//                    print("\(atm.ExpireDate)")
-//                }
-//                if let cvs = callbackState.CVSInfo {
-//                    print("\(cvs)")
-//                    print("\(cvs.PaymentNo ?? "")")
-//                    print("\(cvs.ExpireDate)")
-//                    print("\(cvs.PaymentURL ?? "")")
-//                }
-//                if let barcode = callbackState.BarcodeInfo {
-//                    print("\(barcode)")
-//                    print("\(barcode.ExpireDate)")
-//                    print("\(barcode.Barcode1 ?? "")")
-//                    print("\(barcode.Barcode2 ?? "")")
-//                    print("\(barcode.Barcode3 ?? "")")
-//                }
-//                if let unionpay = callbackState.UnionPayInfo {
-//                    print("\(unionpay.UnionPayURL ?? "")")
-//                }
-//
-//            }
+            if let callbackState = state as? CreatePaymentCallbackState {
+                
+                if let atm = callbackState.ATMInfo {
+                    print("\(atm)")
+                    print("\(atm.BankCode ?? "")")
+                    print("\(atm.vAccount ?? "")")
+                    print("\(atm.ExpireDate)")
+//                    self.eventSink!("atm");
+//                    self.eventSink!("atm:" + "\(atm.BankCode ?? "")");
+//                    self.eventSink!("atm:" + "\(atm.vAccount ?? "")");
+//                    self.eventSink!("atm:" + "\(atm.ExpireDate)");
+                    
+                    var atmJson = "{\"bankCode\":\"\(atm.BankCode ?? "")\",\"vAccount\":\"\(atm.vAccount ?? "")\",\"expireDate\":\"\(atm.ExpireDate)\",\"orderId\":\(orderId),\"tourBus\":\(tourBus)}"
+                    self.eventSink!(atmJson);
+                    
+                }
+                
+                if(callbackState.RtnCode==1){
+//                    self.eventSink!("success");
+                }
+                
+                print("CreatePaymentCallbackState:")
+                print("RtnCode = \(callbackState.RtnCode)")
+                print("RtnMsg = \(callbackState.RtnMsg)")
+
+                if let order = callbackState.OrderInfo {
+                    print("\(order)")
+                    print("\(order.MerchantTradeNo ?? "")")
+                    print("\(order.TradeNo ?? "")")
+                    print("\(order.TradeDate)")
+                    print("\(order.TradeStatus ?? "")")
+                    print("\(order.PaymentDate)")
+                    print("\(order.TradeAmt ?? 0)")
+                    print("\(order.PaymentType ?? "")")
+                    print("\(order.ChargeFee ?? 0)")
+                    print("\(order.TradeStatus ?? "")")
+
+                }
+                if let card = callbackState.CardInfo {
+                    if(callbackState.RtnCode==1){
+                        self.eventSink!("orderId="+orderId);
+                    }
+                    print("\(card)")
+                    print("\(card.AuthCode ?? "")")
+                    print("\(card.Gwsr ?? "")")
+                    print("\(card.ProcessDate)")
+                    print("\(card.Stage ?? 0)")
+                    print("\(card.Stast ?? 0)")
+                    print("\(card.Staed ?? 0)")
+                    print("\(card.Amount ?? 0)")
+                    print("\(card.Eci ?? 0)")
+                    print("\(card.Card6No ?? "")")
+                    print("\(card.Card4No ?? "")")
+                    print("\(card.RedDan ?? 0)")
+                    print("\(card.RedDeAmt ?? 0)")
+                    print("\(card.RedOkAmt ?? 0)")
+                    print("\(card.RedYet ?? 0)")
+                    print("\(card.PeriodType ?? "")")
+                    print("\(card.Frequency ?? 0)")
+                    print("\(card.ExecTimes ?? 0)")
+                    print("\(card.PeriodAmount ?? 0)")
+                    print("\(card.TotalSuccessTimes ?? 0)")
+                    print("\(card.TotalSuccessAmount ?? 0)")
+                }
+                if let atm = callbackState.ATMInfo {
+                    print("\(atm)")
+                    print("\(atm.BankCode ?? "")")
+                    print("\(atm.vAccount ?? "")")
+                    print("\(atm.ExpireDate)")
+                }
+                if let cvs = callbackState.CVSInfo {
+                    print("\(cvs)")
+                    print("\(cvs.PaymentNo ?? "")")
+                    print("\(cvs.ExpireDate)")
+                    print("\(cvs.PaymentURL ?? "")")
+                }
+                if let barcode = callbackState.BarcodeInfo {
+                    print("\(barcode)")
+                    print("\(barcode.ExpireDate)")
+                    print("\(barcode.Barcode1 ?? "")")
+                    print("\(barcode.Barcode2 ?? "")")
+                    print("\(barcode.Barcode3 ?? "")")
+                }
+                if let unionpay = callbackState.UnionPayInfo {
+                    print("\(unionpay.UnionPayURL ?? "")")
+                }
+
+            }
         }
     }
       

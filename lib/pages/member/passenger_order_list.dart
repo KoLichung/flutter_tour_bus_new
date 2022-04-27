@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/pages/booking/payment_confirmed.dart';
+import 'package:flutter_tour_bus_new/pages/member/atm_info_dialog.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_outlined_text.dart';
 import 'package:flutter_tour_bus_new/constant.dart';
 import 'package:http/http.dart' as http;
@@ -21,7 +23,6 @@ class PassengerOrderList extends StatefulWidget {
 class _PassengerOrderListState extends State<PassengerOrderList> {
 
   List<Order> orderList =[];
-
   // PassengerOrderStatus orderStatus = PassengerOrderStatus();
 
   static const EventChannel paymentCallBackChannel = EventChannel('samples.flutter.io/pay_ec_pay_call_back');
@@ -34,10 +35,41 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
     paymentCallBackChannel.receiveBroadcastStream().listen(_onPaymentState, onError: _onPaymentError);
   }
 
-  void _onPaymentState(Object? event) {
+  Future<void> _onPaymentState(Object? event) async {
     print(event.toString());
-    if(event.toString() == 'success'){
-      Navigator.pushNamed(context, '/payment_confirmed');
+
+    if(event.toString().contains("{") && event.toString().contains("}")){
+      Map<String, dynamic> map = json.decode(event.toString());
+      // print(map["bankCode"]);
+      // print(map["vAccount"]);
+      // print(map["expireDate"]);
+      // print(map["orderId"]);
+      String dateString = "";
+      if(map["expireDate"].toString().contains("Optional")){
+        dateString = map["expireDate"].toString().replaceAll("Optional", "").replaceAll("(", "").replaceAll(")", "");
+        map["date"] = DateTime.parse(dateString);
+      }else{
+        dateString = map["expireDate"];
+        map["date"] = DateFormat('yyyy/MM/dd').parse(dateString);
+      }
+      // print(dateString);
+      // print(DateTime.parse(dateString));
+
+      print(map);
+      var userModel = context.read<UserModel>();
+      _httpPutUpdateOrderATMInfo(userModel.token!, map);
+    }
+
+    if(event.toString().contains("orderId=")){
+      int orderId = int.parse(event.toString().replaceAll("orderId=", ""));
+      final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>  PaymentConfirmed(orderId: orderId),
+          ));
+      if(result == "ok"){
+        _fetchOrderList();
+      }
     }else if(event.toString() == 'fail'){
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('交易失敗!')));
     }
@@ -87,7 +119,7 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
   }
 
   Widget _getOrderStatusButton(Order order, BuildContext context){
-    PassengerOrderStatus orderStatus = PassengerOrderStatus(order.id);
+    PassengerOrderStatus orderStatus = PassengerOrderStatus(order);
     if(order.state=="waitOwnerCheck"){
       return orderStatus.pending();
     }else if(order.state=="ownerCanceled"){
@@ -95,9 +127,14 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
     }else if(order.state=="waitForDeposit"){
       return orderStatus.waitingForPayment(context);
     }else if(order.state=="waitForAtmDeposit"){
-      return orderStatus.waitingForATM(context);
+      DateTime expireDate = DateTime.parse(order.aTMInfoExpireDate!);
+      if (expireDate.isAfter(DateTime.now())){
+        return orderStatus.waitingForATM(context);
+      }else{
+        return orderStatus.atmExpired(context);
+      }
     }else if(order.state=="ownerWillContact"){
-      return orderStatus.confirmed();
+      return orderStatus.confirmed(context);
     }else if(order.state=="closed"){
       return orderStatus.complete();
     }
@@ -129,6 +166,39 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
       print(e);
     }
   }
+
+  Future _httpPutUpdateOrderATMInfo(String token, Map map) async {
+
+    String path = Service.ORDERS + map["orderId"].toString() + "/";
+
+    try {
+      final bodyParams = {
+        "isAtm": true,
+        "ATMInfoBankCode": map["bankCode"],
+        "ATMInfovAccount": map["vAccount"],
+        "ATMInfoExpireDate": map["date"].toString(),
+        "tourBus": map["tourBus"].toString(),
+        "state": "waitForAtmDeposit",
+      };
+
+      final response = await http.put(Service.standard(path: path),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'token $token'
+        },
+        body: jsonEncode(bodyParams),
+      );
+
+      print(response.body);
+      if (response.statusCode == 200) {
+        print("success update order atm info");
+        _fetchOrderList();
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
 }
 
 class PassengerOrderStatus {
@@ -137,9 +207,9 @@ class PassengerOrderStatus {
   static const MethodChannel methodPayChannel = MethodChannel('samples.flutter.io/pay_ec_pay');
 
   String token = "";
-  int? orderId;
+  Order? order;
 
-  PassengerOrderStatus(this.orderId);
+  PassengerOrderStatus(this.order);
 
   Future<void> _getTestToken() async {
     String message;
@@ -159,11 +229,13 @@ class PassengerOrderStatus {
     }
   }
 
-  Future<void> _payECPay(String token) async {
+  Future<void> _payECPay(String token, int orderId, int tourBus) async {
     String message;
     try {
       final result = await methodPayChannel.invokeMethod('payECPay',  <String, dynamic>{
         "token": token,
+        "orderId": orderId.toString(),
+        "tourBus": tourBus.toString(),
       });
       message = 'return message: $result';
     } on PlatformException {
@@ -187,10 +259,14 @@ class PassengerOrderStatus {
   waitingForPayment(context){
     return GestureDetector(
       onTap: (){
-        _fetchPaymentToken(context,orderId!);
-        // _getTestToken();
+        _fetchPaymentToken(context, order!);
 
-        // _payECPay();
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) =>  PaymentConfirmed(orderId: order!.id!),
+        //     ));
+
       },
       child: const CustomOutlinedText(
         color: AppColor.pending,
@@ -200,8 +276,12 @@ class PassengerOrderStatus {
 
   waitingForATM(context){
     return GestureDetector(
-      onTap: (){
-
+      onTap: () async {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AtmInfoDialog(theOrder: order!);
+          });
       },
       child: const CustomOutlinedText(
           color: AppColor.pending,
@@ -209,11 +289,30 @@ class PassengerOrderStatus {
     );
   }
 
-  confirmed(){
-    return const CustomOutlinedText(
-        color: AppColor.waiting,
-        title: '收訂，業者\n會接洽您');
+  atmExpired(context){
+    return GestureDetector(
+      onTap: (){
 
+      },
+      child: const CustomOutlinedText(
+          color: AppColor.decline,
+          title: 'ATM過期'),
+    );
+  }
+
+  confirmed(context){
+    return GestureDetector(
+      onTap: (){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>  PaymentConfirmed(orderId: order!.id!),
+            ));
+      },
+      child: const CustomOutlinedText(
+          color: AppColor.waiting,
+          title: '收訂，業者\n會接洽您'),
+    );
   }
 
   onGoing(){
@@ -228,13 +327,13 @@ class PassengerOrderStatus {
         title: '已結案');
   }
 
-  Future _fetchPaymentToken(BuildContext context,int orderId) async {
+  Future _fetchPaymentToken(BuildContext context,Order order) async {
 
     String path = Service.PATH_GET_PAYMENT_TOKEN;
     try {
 
       final queryParameters = {
-        "order_id" : orderId.toString(),
+        "order_id" : order.id.toString(),
       };
 
       final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));
@@ -245,7 +344,7 @@ class PassengerOrderStatus {
         // print(map);
         if(map['Token']!=null){
           print('token ${map['Token']}');
-          _payECPay(map['Token']);
+          _payECPay(map['Token'], order.id!, order.tourBus!);
         }else{
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('無法正確取得付款資訊!')));
         }

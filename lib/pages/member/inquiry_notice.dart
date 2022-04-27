@@ -28,9 +28,7 @@ class _InquiryNoticeSate extends  State<InquiryNotice> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('今日租賃需求公告'),),
-      body: Column(
-        children: [
-          ListView.builder(
+      body: ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               itemCount: announcementList.length,
@@ -52,11 +50,7 @@ class _InquiryNoticeSate extends  State<InquiryNotice> {
                   );
 
               } ),
-        ],
-
-
-      ),
-    );
+      );
   }
 
   Future _httpGetAnnouncements() async {

@@ -10,6 +10,10 @@ class Order {
   int? orderMoney;
   int? depositMoney;
   String? memo;
+  bool? isAtm;
+  String? aTMInfoBankCode;
+  String? aTMInfovAccount;
+  String? aTMInfoExpireDate;
   String? busTitle;
   String? name;
   String? phone;
@@ -26,6 +30,10 @@ class Order {
         this.orderMoney,
         this.depositMoney,
         this.memo,
+        this.isAtm,
+        this.aTMInfoBankCode,
+        this.aTMInfovAccount,
+        this.aTMInfoExpireDate,
         this.busTitle,
         this.name,
         this.phone});
@@ -42,6 +50,18 @@ class Order {
     orderMoney = json['orderMoney'];
     depositMoney = json['depositMoney'];
     memo = json['memo'];
+    try {
+      isAtm = json['isAtm'];
+    }catch(e){
+      isAtm = false;
+    }
+    try{
+      aTMInfoBankCode = json['ATMInfoBankCode'];
+      aTMInfovAccount = json['ATMInfovAccount'];
+      aTMInfoExpireDate = json['ATMInfoExpireDate'];
+    }catch(e){
+      print(e);
+    }
     busTitle = json['busTitle'];
     name = json['name'];
     phone = json['phone'];
@@ -60,6 +80,10 @@ class Order {
     data['orderMoney'] = this.orderMoney;
     data['depositMoney'] = this.depositMoney;
     data['memo'] = this.memo;
+    data['isAtm'] = this.isAtm;
+    data['ATMInfoBankCode'] = this.aTMInfoBankCode;
+    data['ATMInfovAccount'] = this.aTMInfovAccount;
+    data['ATMInfoExpireDate'] = this.aTMInfoExpireDate;
     data['busTitle'] = this.busTitle;
     data['name'] = this.name;
     data['phone'] = this.phone;

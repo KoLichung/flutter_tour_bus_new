@@ -30,14 +30,46 @@ class User {
     id = json['id'];
     phone = json['phone'];
     name = json['name'];
-    isOwner = json['isOwner'];
-    company = json['company'];
-    address = json['address'];
-    vehicalLicence = json['vehicalLicence'];
-    vehicalOwner = json['vehicalOwner'];
-    vehicalEngineNumber = json['vehicalEngineNumber'];
-    vehicalBodyNumber = json['vehicalBodyNumber'];
-    vehicalLicenceImage = json['vehicalLicenceImage'];
+    if(json['isOwner']!=null){
+      isOwner = json['isOwner'];
+    }else{
+      isOwner = false;
+    }
+    if(json['company']!=null){
+      company = json['company'];
+    }else{
+      company = "";
+    }
+    if(json['address']!=null){
+      address = json['address'];
+    }else{
+      address = "";
+    }
+    if(json['vehicalLicence']!=null){
+      vehicalLicence = json['vehicalLicence'];
+    }else{
+      vehicalLicence = "";
+    }
+    if(json['vehicalOwner']!=null){
+      vehicalOwner = json['vehicalOwner'];
+    }else{
+      vehicalOwner = "";
+    }
+    if(json['vehicalEngineNumber']!=null){
+      vehicalEngineNumber = json['vehicalEngineNumber'];
+    }else{
+      vehicalEngineNumber = "";
+    }
+    if(json['vehicalBodyNumber']!=null){
+      vehicalBodyNumber = json['vehicalBodyNumber'];
+    }else{
+      vehicalBodyNumber = "";
+    }
+    if(json['vehicalLicenceImage']!=null){
+      vehicalLicenceImage = json['vehicalLicenceImage'];
+    }else{
+      vehicalLicenceImage = "";
+    }
     isGottenLineId = json['is_gotten_line_id'];
   }
 

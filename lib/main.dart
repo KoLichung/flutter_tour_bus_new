@@ -123,7 +123,6 @@ class MyApp extends StatelessWidget {
         '/inquiry_notice': (context) => InquiryNotice(),
         '/edit_user_profile': (context) => const EditUserProfile(),
         '/order_list': (context) => const PassengerOrderList(),
-        '/payment_confirmed': (context) => const PaymentConfirmed(),
         '/bus_list': (context) => const DriversBusList(),
         '/add_new_bus': (context) => const AddNewBus(),
         // '/edit_bus_profile': (context) => const EditBusProfile(),

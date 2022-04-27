@@ -30,8 +30,10 @@ class SearchList extends StatefulWidget {
 
 class _SearchListState extends State<SearchList> {
 
-  List<Bus> busResult =[];
+  // List<Bus> busResult =[];
   bool isLoading = false;
+  List<Bus> topBusses = [];
+  List<Bus> regularBuses = [];
 
   @override
   void initState() {
@@ -91,34 +93,19 @@ class _SearchListState extends State<SearchList> {
       return ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          itemCount: busResult.length,
+          itemCount: topBusses.length+regularBuses.length,
           itemBuilder:(BuildContext context,int i){
             return Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
-                    leading:
-                    (busResult[i].coverImage!=null)?
-                    Container(
-                      width: 100,
-                      child: Image.network(busResult[i].coverImage!,fit: BoxFit.cover,),
-                    ):
-                    Container(
-                      width: 100,
-                    ),
+                    leading:getLeadingImage(i),
                     title:
-                    (busResult[i].isTop!)?
-                        Row(children: [
-                          Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
-                          const SizedBox(width: 10,),
-                          const Chip(
-                            visualDensity: VisualDensity(horizontal: 0, vertical: -2),
-                            backgroundColor: AppColor.pending,
-                            label: Text('置頂推薦',style: TextStyle(fontSize: 13,color: Colors.white),),)
-                        ],)
+                    (i<topBusses.length)?
+                    Text(topBusses[i].title!, style: Theme.of(context).textTheme.subtitle2)
                     :
-                    Text(busResult[i].title!, style: Theme.of(context).textTheme.subtitle2,),
+                    Text(regularBuses[i-topBusses.length].title!, style: Theme.of(context).textTheme.subtitle2),
                     // subtitle:RichText(
                     //     text: TextSpan(text: busResult[i].vehicalBodyNumber,
                     //             style:const TextStyle(color: AppColor.grey),
@@ -128,14 +115,23 @@ class _SearchListState extends State<SearchList> {
                     //             ],
                     //           ),
                     // ),
-                    subtitle: Text('所在地：${busResult[i].city}\n年份：${busResult[i].vehicalYearOfManufacture!}  座位：${busResult[i].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2),
+                    subtitle:
+                    (i<topBusses.length)?
+                    Text('所在地：${topBusses[i].city}\n年份：${topBusses[i].vehicalYearOfManufacture!}  座位：${topBusses[i].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2)
+                    :
+                    Text('所在地：${regularBuses[i-topBusses.length].city}\n年份：${regularBuses[i-topBusses.length].vehicalYearOfManufacture!}  座位：${regularBuses[i-topBusses.length].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2),
                     onTap: (){
-                      Bus theBus = busResult[i];
+                      Bus? theBus;
+                      if(i<topBusses.length){
+                        theBus = topBusses[i];
+                      }else{
+                        theBus = regularBuses[i-topBusses.length];
+                      }
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => RentalBusDetail(
-                              theBus: theBus,
+                              theBus: theBus!,
                               fromCity: widget.fromCity,
                               toCity: widget.toCity,
                               startDate: widget.startDate,
@@ -151,6 +147,25 @@ class _SearchListState extends State<SearchList> {
             );
           } );
     }
+  }
+
+  Widget getLeadingImage(int i){
+    if((i<topBusses.length && topBusses[i].coverImage == null) || (i>=topBusses.length && regularBuses[i-topBusses.length].coverImage == null )){
+      return Container(
+        width: 100,
+      );
+    }else if(i<topBusses.length){
+      return Container(
+        width: 100,
+        child: Image.network(topBusses[i].coverImage!,fit: BoxFit.cover),
+      );
+    }else{
+      return Container(
+        width: 100,
+        child: Image.network(regularBuses[i-topBusses.length].coverImage!,fit: BoxFit.cover),
+      );
+    }
+
   }
 
   getPopUpMenu(){
@@ -177,13 +192,13 @@ class _SearchListState extends State<SearchList> {
         print(value);
         if(value==1){
           City theCity = City.getCityFromName(widget.fromCity);
-          busResult.sort( (a,b) => _calculateDistance(theCity.lat, theCity.lng, a.lat, a.lng).compareTo(_calculateDistance(theCity.lat, theCity.lng, b.lat, b.lng)) );
+          regularBuses.sort( (a,b) => _calculateDistance(theCity.lat, theCity.lng, a.lat, a.lng).compareTo(_calculateDistance(theCity.lat, theCity.lng, b.lat, b.lng)) );
         }else if(value==2){
-          busResult.sort((a, b) => - int.parse(a.vehicalYearOfManufacture!).compareTo(double.parse(b.vehicalYearOfManufacture!)));
+          regularBuses.sort((a, b) => - int.parse(a.vehicalYearOfManufacture!).compareTo(double.parse(b.vehicalYearOfManufacture!)));
         }else if(value==3){
-          busResult.sort((a, b) => - (a.vehicalSeats!).compareTo(b.vehicalSeats!));
+          regularBuses.sort((a, b) => - (a.vehicalSeats!).compareTo(b.vehicalSeats!));
         }else if(value==4){
-          busResult.sort((a, b) => (a.vehicalSeats!).compareTo(b.vehicalSeats!));
+          regularBuses.sort((a, b) => (a.vehicalSeats!).compareTo(b.vehicalSeats!));
         }
         setState(() {});
       }
@@ -208,7 +223,13 @@ class _SearchListState extends State<SearchList> {
         List<Bus> data = List<Bus>.from(parsedListJson.map((i) => Bus.fromJson(i)));
         // print(data[0].title);
         // print(data[1].city);
-        busResult = data;
+        for(Bus theBus in data){
+          if(theBus.isTop!){
+            topBusses.add(theBus);
+          }else{
+            regularBuses.add(theBus);
+          }
+        }
         // print(busResult);
 
 

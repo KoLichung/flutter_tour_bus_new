@@ -36,8 +36,11 @@ import com.chijia.flutter_tour_bus_new.util.UIUtil;
 import com.chijia.flutter_tour_bus_new.util.Utility;
 import com.google.gson.Gson;
 
+import org.json.JSONObject;
+
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -81,6 +84,9 @@ public class MainActivity extends FlutterActivity {
     private Activity mActivity;
     private ServerType serverType = ServerType.Stage;
     private String theToken = "";
+
+    private String orderId = "";
+    private String tourBus = "";
 
 //    private MainActivityBinding binding;
 //    @Override
@@ -142,6 +148,9 @@ public class MainActivity extends FlutterActivity {
                     public void onMethodCall(MethodCall call, Result result) {
                         if (call.method.equals("payECPay")) {
                             String token = call.argument("token");
+                            orderId = call.argument("orderId");
+                            tourBus = call.argument("tourBus");
+
                             payECPay(token);
 
                             if (true) {
@@ -163,8 +172,7 @@ public class MainActivity extends FlutterActivity {
                     @Override
                     public void onListen(Object arguments, EventChannel.EventSink events) {
                         chargingStateChangeReceiver = createChargingStateChangeReceiver(events);
-                        registerReceiver(
-                                chargingStateChangeReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                        registerReceiver(chargingStateChangeReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                     }
 
                     @Override
@@ -493,6 +501,8 @@ public class MainActivity extends FlutterActivity {
                                     sb.append(callbackData.getCardInfo().getCard4No());
                                 }
                                 if(callbackData.getPaymentType() == PaymentType.CreditCard) {
+                                    intent.putExtra("status", "orderId="+orderId);
+                                    sendBroadcast(intent);
                                     sb.append("\r\n");
                                     sb.append("CardInfo.RedDan");
                                     sb.append("\r\n");
@@ -552,6 +562,16 @@ public class MainActivity extends FlutterActivity {
                                 }
 
                                 if(callbackData.getPaymentType() == PaymentType.ATM) {
+                                    HashMap<String, String> map = new HashMap<String, String>();
+                                    map.put("bankCode", callbackData.getAtmInfo().getBankCode());
+                                    map.put("vAccount", callbackData.getAtmInfo().getvAccount());
+                                    map.put("expireDate", callbackData.getAtmInfo().getExpireDate());
+                                    map.put("orderId", orderId);
+                                    map.put("tourBus", tourBus);
+                                    String jsonString = new JSONObject(map).toString();
+                                    intent.putExtra("status", jsonString);
+                                    sendBroadcast(intent);
+
                                     sb.append("\r\n");
                                     sb.append("\r\n");
                                     sb.append("ATMInfo.BankCode");
@@ -601,12 +621,12 @@ public class MainActivity extends FlutterActivity {
                                     sb.append(callbackData.getBarcodeInfo().getBarcode3());
                                 }
 
-                                UIUtil.showAlertDialog(mActivity, "提醒您", sb.toString(), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                }, "確定");
+//                                UIUtil.showAlertDialog(mActivity, "提醒您", sb.toString(), new DialogInterface.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(DialogInterface dialog, int which) {
+//
+//                                    }
+//                                }, "確定");
                             } else {
                                 intent.putExtra("status", "fail");
                                 sendBroadcast(intent);
@@ -617,43 +637,43 @@ public class MainActivity extends FlutterActivity {
                                 sb.append(callbackData.getRtnMsg());
 
 
-                                UIUtil.showAlertDialog(mActivity, "提醒您", sb.toString(), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                }, "確定");
+//                                UIUtil.showAlertDialog(mActivity, "提醒您", sb.toString(), new DialogInterface.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(DialogInterface dialog, int which) {
+//
+//                                    }
+//                                }, "確定");
                             }
                             break;
                         case Fail:
                             intent.putExtra("status", "fail");
                             sendBroadcast(intent);
-                            UIUtil.showAlertDialog(mActivity, "提醒您", "Fail Code=" + callbackData.getRtnCode() + ", Msg=" + callbackData.getRtnMsg(), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            }, "確定");
+//                            UIUtil.showAlertDialog(mActivity, "提醒您", "Fail Code=" + callbackData.getRtnCode() + ", Msg=" + callbackData.getRtnMsg(), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//
+//                                }
+//                            }, "確定");
                             break;
                         case Cancel:
                             intent.putExtra("status", "cancel");
                             sendBroadcast(intent);
-                            UIUtil.showAlertDialog(mActivity, "提醒您", "交易取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            }, "確定");
+//                            UIUtil.showAlertDialog(mActivity, "提醒您", "交易取消", new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//
+//                                }
+//                            }, "確定");
                             break;
                         case Exit:
                             intent.putExtra("status", "exit");
                             sendBroadcast(intent);
-                            UIUtil.showAlertDialog(mActivity, "提醒您", "離開", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            }, "確定");
+//                            UIUtil.showAlertDialog(mActivity, "提醒您", "離開", new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//
+//                                }
+//                            }, "確定");
                             break;
                     }
                 }

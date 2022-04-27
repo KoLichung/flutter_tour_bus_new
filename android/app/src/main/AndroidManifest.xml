@@ -6,7 +6,7 @@
 <!--    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
 
    <application
-        android:label="flutter_tour_bus_new"
+        android:label="遊覽車租賃"
         android:theme="@style/AppTheme"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"

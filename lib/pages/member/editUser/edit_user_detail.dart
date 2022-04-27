@@ -82,7 +82,7 @@ class _EditUserDetailState extends State<EditUserDetail> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('註冊選擇身份'),
+          title: const Text('修改資料'),
         ),
         body: (isLoading)?
           const Center(
@@ -200,29 +200,12 @@ class _EditUserDetailState extends State<EditUserDetail> {
                     child: Text('* 業主資訊')),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          primary: AppColor.yellow,
-                          elevation: 0
-                      ),
-                      child: const SizedBox(
-                        height: 40,
-                        width: 80,
-                        child: Align(
-                          child: Text(
-                            '業主規範',
-                            style: TextStyle(fontSize: 16),),
-                          alignment: Alignment.center,
-                        ),
-                      )
-
-                  ),
-                  const Text('  (請點入並同意規範)'),
+                children: const [
+                  Text('我已同意下列遊覽車業者規範：'),
                 ],
               ),
+              const Text('在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。使用平台服務費為出車一天\$500元。'),
+              const SizedBox(height: 10,),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(children: [
@@ -266,7 +249,7 @@ class _EditUserDetailState extends State<EditUserDetail> {
                     ),
                     onPressed: () async {
                       final ImagePicker _picker = ImagePicker();
-                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
 
                       if(pickedFile == null) return;
 
@@ -419,6 +402,5 @@ class _EditUserDetailState extends State<EditUserDetail> {
     //   return "error";
     // }
   }
-
 
 }
