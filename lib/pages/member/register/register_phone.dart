@@ -19,7 +19,7 @@ class RegisterPhone extends StatefulWidget {
 class _RegisterPhoneState extends State<RegisterPhone> {
 
   TextEditingController phoneNumberController = TextEditingController();
-  TextEditingController pwdTextController = TextEditingController();
+  // TextEditingController pwdTextController = TextEditingController();
 
 
   @override
@@ -83,7 +83,7 @@ class _RegisterPhoneState extends State<RegisterPhone> {
         );
         // setState(() {});
       }else{
-        ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('可能網路不佳，請再試一次！')));
+        ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('電話錯誤或此電話已經註冊！')));
       }
 
     } catch (e) {

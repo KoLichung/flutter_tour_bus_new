@@ -35,18 +35,23 @@ class _AddNewBusState extends State<AddNewBus> {
   TextEditingController carTitleController = TextEditingController();
   TextEditingController licenseController = TextEditingController();
   TextEditingController ownerController = TextEditingController();
-  TextEditingController engineNumController = TextEditingController();
-  TextEditingController bodyNumController = TextEditingController();
+  // TextEditingController engineNumController = TextEditingController();
+  // TextEditingController bodyNumController = TextEditingController();
   TextEditingController seatNumController = TextEditingController();
   TextEditingController yearManufactureController = TextEditingController();
 
+  XFile? driverlicenseImage;
   XFile? licenseImage;
 
   List<XFile> outLookImageList = [];
   List<XFile> interiorImageList = [];
+
   XFile? luggageImage;
 
   bool isLoading = false;
+
+  double maxWidth = 640;
+  double maxHeight= 480;
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +80,8 @@ class _AddNewBusState extends State<AddNewBus> {
               driverInputRow('標題：',carTitleController, false),
               driverInputRow('牌照：',licenseController, false),
               driverInputRow('車主：',ownerController, false),
-              driverInputRow('引擎號碼：',engineNumController, false),
-              driverInputRow('車身號碼：',bodyNumController, false),
+              // driverInputRow('引擎號碼：',engineNumController, false),
+              // driverInputRow('車身號碼：',bodyNumController, false),
               driverInputRow('座位數：',seatNumController, true),
               driverInputRow('出廠年份：',yearManufactureController, true),
               Container(
@@ -88,13 +93,63 @@ class _AddNewBusState extends State<AddNewBus> {
                     getLocationDistrict()
                 ],),
               ),
+              imageUploadButtonTitle('上傳駕照：'),
+              Row(
+                children: [
+                  ImageUploadButton(
+                      onPressed: ()async {
+                        final ImagePicker _picker = ImagePicker();
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: maxWidth, maxHeight: maxHeight);
+
+                        if(pickedFile == null) return;
+
+                        driverlicenseImage = pickedFile;
+
+                        setState(() {});
+
+                      }),
+                  driverlicenseImage == null ? SizedBox() : Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Container(
+                            margin: const EdgeInsets.fromLTRB(0,6,0,6),
+                            height: 60, width: 60,
+                            child: Image.file(File(driverlicenseImage!.path),fit: BoxFit.cover,)),
+                        Positioned(
+                          top: 8,
+                          right: 2,
+                          child: GestureDetector(
+                            onTap: () async {
+                              var data = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AddNewBusDeletePhotoDialog();
+                                  });
+                              if (data == 'confirmDelete'){
+                                setState(() {
+                                  driverlicenseImage = null;
+                                });
+                              }
+                            },
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              child: const Icon(Icons.clear, size: 14,color: Colors.white,),
+                              decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.red),
+                            ),
+                          ),
+                        )
+                      ]
+                  ),],),
               imageUploadButtonTitle('上傳行照：'),
               Row(
                 children: [
                   ImageUploadButton(
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
-                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: maxWidth, maxHeight: maxHeight);
 
                         if(pickedFile == null) return;
 
@@ -147,9 +202,8 @@ class _AddNewBusState extends State<AddNewBus> {
                         final ImagePicker _picker = ImagePicker();
                         final List<XFile>? pickedFile = await _picker.pickMultiImage(
                           // source: ImageSource.gallery,
-                          // maxWidth: maxWidth,
-                          // maxHeight: maxHeight,
-                          maxWidth: 640,
+                          maxWidth: maxWidth,
+                          maxHeight: maxHeight,
                         );
 
                         if(pickedFile == null) return;
@@ -232,9 +286,8 @@ class _AddNewBusState extends State<AddNewBus> {
                         final ImagePicker _picker = ImagePicker();
                         final List<XFile>? pickedFile = await _picker.pickMultiImage(
                           // source: ImageSource.gallery,
-                          // maxWidth: maxWidth,
-                          // maxHeight: maxHeight,
-                          maxWidth: 640,
+                          maxWidth: maxWidth,
+                          maxHeight: maxHeight,
                         );
 
                         if(pickedFile == null) return;
@@ -316,7 +369,7 @@ class _AddNewBusState extends State<AddNewBus> {
 
                       onPressed: ()async {
                         final ImagePicker _picker = ImagePicker();
-                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
+                        final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: maxWidth, maxHeight: maxHeight);
 
                         if(pickedFile == null) return;
 
@@ -366,11 +419,12 @@ class _AddNewBusState extends State<AddNewBus> {
                 title: '確定新增',
                 color: AppColor.yellow,
                 onPressed: (){
-                  if (carTitleController.text != '' && licenseController.text != '' && engineNumController.text != ''
-                      && bodyNumController.text!= '' && seatNumController.text!= '' && ownerController.text!= '' && yearManufactureController.text!=''){
+                  if (carTitleController.text != '' && licenseController.text != ''&& seatNumController.text!= '' && ownerController.text!= '' && yearManufactureController.text!=''){
 
                     if(licenseImage == null){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("行照不可空白！"),));
+                    }else if(driverlicenseImage == null){
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("駕照不可空白！"),));
                     }else if(luggageImage == null){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("行李箱不可空白！"),));
                     }else if(outLookImageList.isEmpty){
@@ -387,8 +441,8 @@ class _AddNewBusState extends State<AddNewBus> {
                       theBus.vehicalSeats = int.parse(seatNumController.text);
                       theBus.vehicalLicence = licenseController.text;
                       theBus.vehicalOwner = ownerController.text;
-                      theBus.vehicalEngineNumber = engineNumController.text;
-                      theBus.vehicalBodyNumber = bodyNumController.text;
+                      // theBus.vehicalEngineNumber = engineNumController.text;
+                      // theBus.vehicalBodyNumber = bodyNumController.text;
                       theBus.vehicalYearOfManufacture = yearManufactureController.text;
 
                       _postCreateNewCar(theBus, userModel.token!);
@@ -597,7 +651,7 @@ class _AddNewBusState extends State<AddNewBus> {
     Navigator.pop(context);
   }
 
-  Future _uploadLicenceImage(XFile? image, String token, int busId)async{
+  Future _uploadLicenceImage(XFile? image, XFile? driverImage, String token, int busId)async{
     print("here to upload image");
     String path = Service.BUSSES+'$busId/';
     var request = http.MultipartRequest('PUT', Service.standard(path: path));
@@ -610,8 +664,11 @@ class _AddNewBusState extends State<AddNewBus> {
     request.headers.addAll(headers);
 
     final file = await http.MultipartFile.fromPath('vehicalLicenceImage', image!.path);
-
     request.files.add(file);
+
+    final driverFile = await http.MultipartFile.fromPath('driverLicenceImage', driverImage!.path);
+    request.files.add(driverFile);
+
     request.fields['isPublish'] = 'true';
 
     var response = await request.send();
@@ -648,8 +705,6 @@ class _AddNewBusState extends State<AddNewBus> {
         'vehicalSeats': theBus.vehicalSeats,
         'vehicalLicence': theBus.vehicalLicence,
         'vehicalOwner': theBus.vehicalOwner,
-        'vehicalEngineNumber': theBus.vehicalEngineNumber,
-        'vehicalBodyNumber': theBus.vehicalBodyNumber,
         'vehicalYearOfManufacture': theBus.vehicalYearOfManufacture,
         'isPublish': true,
       };
@@ -666,7 +721,7 @@ class _AddNewBusState extends State<AddNewBus> {
       print(response.body);
       Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
       if(map['title']!=null){
-        _uploadLicenceImage(licenseImage, token, map['id']);
+        _uploadLicenceImage(licenseImage, driverlicenseImage,token, map['id']);
       }
       print(response.statusCode);
 

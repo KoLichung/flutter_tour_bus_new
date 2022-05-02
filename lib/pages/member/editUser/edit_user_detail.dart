@@ -34,11 +34,13 @@ class _EditUserDetailState extends State<EditUserDetail> {
   TextEditingController companyAddressTextController = TextEditingController();
   TextEditingController vehicalLicenceTextController = TextEditingController();
   TextEditingController vehicalOwnerTextController = TextEditingController();
-  TextEditingController vehicalEngineNumberTextController = TextEditingController();
-  TextEditingController vehicalBodyNumberTextController = TextEditingController();
+  // TextEditingController vehicalEngineNumberTextController = TextEditingController();
+  // TextEditingController vehicalBodyNumberTextController = TextEditingController();
 
+  XFile? driverlicenseImage;
   XFile? licenseImage;
   String? currentImageUrl;
+  String? currentDriverImageUrl;
 
   UserIdentity? _userIdentity = UserIdentity.passenger;
 
@@ -66,10 +68,11 @@ class _EditUserDetailState extends State<EditUserDetail> {
         companyAddressTextController.text = theUser!.address!;
         vehicalLicenceTextController.text = theUser!.vehicalLicence!;
         vehicalOwnerTextController.text = theUser!.vehicalOwner!;
-        vehicalEngineNumberTextController.text = theUser!.vehicalEngineNumber!;
-        vehicalBodyNumberTextController.text = theUser!.vehicalBodyNumber!;
+        // vehicalEngineNumberTextController.text = theUser!.vehicalEngineNumber!;
+        // vehicalBodyNumberTextController.text = theUser!.vehicalBodyNumber!;
 
         currentImageUrl = theUser!.vehicalLicenceImage;
+        currentDriverImageUrl = theUser!.driverLicenceImage;
       }catch(e){
         print(e);
       }
@@ -122,11 +125,12 @@ class _EditUserDetailState extends State<EditUserDetail> {
                     }
                   }else if(_userIdentity == UserIdentity.driver){
                     if(userNameController.text == '' || userPhoneTextController.text == '' || companyTextController.text == '' ||
-                        companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == '' ||
-                        vehicalEngineNumberTextController.text == '' || vehicalBodyNumberTextController.text == ''){
+                        companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業主各項資料不可空白！"),));
                     }else if(licenseImage == null && currentImageUrl == null){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
+                    }else if(licenseImage == null && currentImageUrl == null){
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳車主駕照照片！"),));
                     }else{
                       User user = User(
                           name: userNameController.text,
@@ -135,8 +139,8 @@ class _EditUserDetailState extends State<EditUserDetail> {
                           address: companyAddressTextController.text,
                           vehicalLicence: vehicalLicenceTextController.text,
                           vehicalOwner: vehicalOwnerTextController.text,
-                          vehicalEngineNumber: vehicalEngineNumberTextController.text,
-                          vehicalBodyNumber: vehicalBodyNumberTextController.text
+                          // vehicalEngineNumber: vehicalEngineNumberTextController.text,
+                          // vehicalBodyNumber: vehicalBodyNumberTextController.text
                       );
                       _putUpdateUser(user, userModel.token!, true);
                       isLoading = true;
@@ -227,15 +231,50 @@ class _EditUserDetailState extends State<EditUserDetail> {
                   const Text('車主：'),
                   Expanded(child: driverFormTextField(vehicalOwnerTextController))]),
               ),
+              // Row(children: [
+              //   const Text('引擎號碼：'),
+              //   Expanded(child: driverFormTextField(vehicalEngineNumberTextController))]),
+              // Container(
+              //   margin: const EdgeInsets.symmetric(vertical: 10),
+              //   child: Row(children: [
+              //     const Text('車身號碼：'),
+              //     Expanded(child: driverFormTextField(vehicalBodyNumberTextController))]),
+              // ),
               Row(children: [
-                const Text('引擎號碼：'),
-                Expanded(child: driverFormTextField(vehicalEngineNumberTextController))]),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(children: [
-                  const Text('車身號碼：'),
-                  Expanded(child: driverFormTextField(vehicalBodyNumberTextController))]),
-              ),
+                const Text('上傳駕照：'),
+                const SizedBox(width: 20,),
+                OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: AppColor.grey,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    onPressed: () async {
+                      final ImagePicker _picker = ImagePicker();
+                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
+
+                      if(pickedFile == null) return;
+
+                      driverlicenseImage = pickedFile;
+                      currentDriverImageUrl = null;
+                      setState(() {});
+                    },
+                    child: Icon(Icons.photo_camera_outlined)),
+                (driverlicenseImage == null && currentDriverImageUrl == null)? SizedBox() :
+                (currentDriverImageUrl == null)?
+                Container(
+                  margin: const EdgeInsets.fromLTRB(10,10,0,8),
+                  height: 60, width: 60,
+                  child: Image.file(File(driverlicenseImage!.path),fit: BoxFit.cover,),
+                ):
+                Container(
+                  margin: const EdgeInsets.fromLTRB(10,10,0,8),
+                  height: 60, width: 60,
+                  child: Image.network(currentDriverImageUrl!,fit: BoxFit.cover,),
+                ),
+              ]),
               Row(children: [
                 const Text('上傳行照：'),
                 const SizedBox(width: 20,),
@@ -300,7 +339,7 @@ class _EditUserDetailState extends State<EditUserDetail> {
     );
   }
 
-  Future _uploadLicenceImage(XFile? image, String token)async{
+  Future _uploadLicenceImage(XFile? image, XFile? driverImage, String token)async{
     print("here to upload image");
     String path = Service.PATH_USER_DATA;
     var request = http.MultipartRequest('PUT', Service.standard(path: path));
@@ -312,9 +351,16 @@ class _EditUserDetailState extends State<EditUserDetail> {
 
     request.headers.addAll(headers);
 
-    final file = await http.MultipartFile.fromPath('vehicalLicenceImage', image!.path);
+    if(image!=null) {
+      final file = await http.MultipartFile.fromPath('vehicalLicenceImage', image.path);
+      request.files.add(file);
+    }
 
-    request.files.add(file);
+    if(driverImage!=null) {
+      final driverFile = await http.MultipartFile.fromPath('driverLicenceImage', driverImage.path);
+      request.files.add(driverFile);
+    }
+
     request.fields['isOwner'] = 'true';
 
     // print(request.files.first.);
@@ -358,8 +404,8 @@ class _EditUserDetailState extends State<EditUserDetail> {
         queryParameters['address'] = user.address;
         queryParameters['vehicalLicence'] = user.vehicalLicence;
         queryParameters['vehicalOwner'] = user.vehicalOwner;
-        queryParameters['vehicalEngineNumber'] = user.vehicalEngineNumber;
-        queryParameters['vehicalBodyNumber'] = user.vehicalBodyNumber;
+        // queryParameters['vehicalEngineNumber'] = user.vehicalEngineNumber;
+        // queryParameters['vehicalBodyNumber'] = user.vehicalBodyNumber;
       }
 
       // print(queryParameters);
@@ -379,8 +425,8 @@ class _EditUserDetailState extends State<EditUserDetail> {
       if(map['name']!=null){
         // print(map['vehicalLicenceImage']);
 
-        if(isOwner && licenseImage != null){
-          _uploadLicenceImage(licenseImage, token);
+        if(isOwner && (licenseImage != null || driverlicenseImage != null)){
+          _uploadLicenceImage(licenseImage, driverlicenseImage, token);
         }else{
           User theUser = User.fromJson(map);
 

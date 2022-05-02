@@ -16,9 +16,13 @@ class _PriceListPageState extends State<PriceListPage> {
   String price =
   '''遊覽車價目表
   
-車資
+甲類大客車：
 平日 \$11000/天
 假日 \$12000/天
+
+乙類大客車：
+平日 \$9000/天
+假日 \$10000/天
 
 司機
 \$2000/天

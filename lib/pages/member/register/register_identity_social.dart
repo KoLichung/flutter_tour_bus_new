@@ -35,14 +35,15 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
   TextEditingController companyAddressTextController = TextEditingController();
   TextEditingController vehicalLicenceTextController = TextEditingController();
   TextEditingController vehicalOwnerTextController = TextEditingController();
-  TextEditingController vehicalEngineNumberTextController = TextEditingController();
-  TextEditingController vehicalBodyNumberTextController = TextEditingController();
+  // TextEditingController vehicalEngineNumberTextController = TextEditingController();
+  // TextEditingController vehicalBodyNumberTextController = TextEditingController();
 
   UserIdentity? _userIdentity = UserIdentity.passenger;
 
   bool driverFormIsVisible = false;
   bool isOwnerAgreementChecked = false;
 
+  XFile? driverlicenseImage;
   XFile? licenseImage;
   bool isLoading = false;
 
@@ -98,11 +99,12 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
                     }else if(_userIdentity == UserIdentity.driver){
                       if(isOwnerAgreementChecked){
                         if(userNameController.text == '' || companyTextController.text == '' ||
-                            companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == '' ||
-                            vehicalEngineNumberTextController.text == '' || vehicalBodyNumberTextController.text == ''){
+                            companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業主各項資料不可空白！"),));
                         }else if(licenseImage == null){
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
+                        }else if(driverlicenseImage == null){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳車主駕照照片！"),));
                         }else{
                           User user = User(
                               name: userNameController.text,
@@ -111,8 +113,8 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
                               address: companyAddressTextController.text,
                               vehicalLicence: vehicalLicenceTextController.text,
                               vehicalOwner: vehicalOwnerTextController.text,
-                              vehicalEngineNumber: vehicalEngineNumberTextController.text,
-                              vehicalBodyNumber: vehicalBodyNumberTextController.text
+                              // vehicalEngineNumber: vehicalEngineNumberTextController.text,
+                              // vehicalBodyNumber: vehicalBodyNumberTextController.text
                           );
                           _postCreateUser(user, widget.lineId, true);
                           isLoading = true;
@@ -213,15 +215,45 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
                   const Text('車主：'),
                   Expanded(child: driverFormTextField(vehicalOwnerTextController))]),
               ),
+              // Row(children: [
+              //   const Text('引擎號碼：'),
+              //   Expanded(child: driverFormTextField(vehicalEngineNumberTextController))]),
+              // Container(
+              //   margin: const EdgeInsets.symmetric(vertical: 10),
+              //   child: Row(children: [
+              //     const Text('車身號碼：'),
+              //     Expanded(child: driverFormTextField(vehicalBodyNumberTextController))]),
+              // ),
               Row(children: [
-                const Text('引擎號碼：'),
-                Expanded(child: driverFormTextField(vehicalEngineNumberTextController))]),
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(children: [
-                  const Text('車身號碼：'),
-                  Expanded(child: driverFormTextField(vehicalBodyNumberTextController))]),
-              ),
+                const Text('上傳駕照：'),
+                const SizedBox(width: 20,),
+                OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(
+                        color: AppColor.grey,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    onPressed: () async {
+                      final ImagePicker _picker = ImagePicker();
+                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640, maxHeight: 480);
+
+                      if(pickedFile == null) return;
+
+                      driverlicenseImage = pickedFile;
+                      setState(() {});
+                    },
+                    child: const Icon(Icons.photo_camera_outlined)
+                ),
+                (driverlicenseImage==null)?
+                SizedBox():
+                Container(
+                  margin: const EdgeInsets.fromLTRB(10,10,0,8),
+                  height: 60, width: 60,
+                  child: Image.file(File(driverlicenseImage!.path),fit: BoxFit.cover,),
+                ),
+              ]),
               Row(children: [
                 const Text('上傳行照：'),
                 const SizedBox(width: 20,),
@@ -301,8 +333,8 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
         queryParameters['address'] = user.address;
         queryParameters['vehicalLicence'] = user.vehicalLicence;
         queryParameters['vehicalOwner'] = user.vehicalOwner;
-        queryParameters['vehicalEngineNumber'] = user.vehicalEngineNumber;
-        queryParameters['vehicalBodyNumber'] = user.vehicalBodyNumber;
+        // queryParameters['vehicalEngineNumber'] = user.vehicalEngineNumber;
+        // queryParameters['vehicalBodyNumber'] = user.vehicalBodyNumber;
         queryParameters['line_id'] = lineId;
         queryParameters['password'] = '00000';
       }
@@ -328,7 +360,7 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
       userModel.isLineLogin = true;
 
       if(isOwner && licenseImage != null){
-        _uploadLicenceImage(licenseImage, token!);
+        _uploadLicenceImage(licenseImage, driverlicenseImage, token!);
       }else{
         Navigator.popUntil(context, ModalRoute.withName('/login_register'));
       }
@@ -370,7 +402,7 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
     }
   }
 
-  Future _uploadLicenceImage(XFile? image, String token)async{
+  Future _uploadLicenceImage(XFile? image, XFile? driverImage,String token)async{
     print("here to upload image");
     String path = Service.PATH_USER_DATA;
     var request = http.MultipartRequest('PUT', Service.standard(path: path));
@@ -383,8 +415,11 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
     request.headers.addAll(headers);
 
     final file = await http.MultipartFile.fromPath('vehicalLicenceImage', image!.path);
-
     request.files.add(file);
+
+    final driverFile = await http.MultipartFile.fromPath('driverLicenceImage', driverImage!.path);
+    request.files.add(driverFile);
+
     request.fields['isOwner'] = 'true';
 
     // print(request.files.first.);
@@ -392,8 +427,33 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
     var response = await request.send();
     // print(response.headers);
     print(response.statusCode);
+
+
     response.stream.transform(utf8.decoder).listen((value) {
       print(value);
+
+      // Widget okButton = TextButton(
+      //   child: Text("OK"),
+      //   onPressed: () { },
+      // );
+      //
+      // // set up the AlertDialog
+      // AlertDialog alert = AlertDialog(
+      //   title: Text("My title"),
+      //   content: Text(value),
+      //   actions: [
+      //     okButton,
+      //   ],
+      // );
+      //
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return alert;
+      //   },
+      // );
+
+
       Map<String, dynamic> map = json.decode(utf8.decode(value.runes.toList()));
       if(map['name']!=null){
         User theUser = User.fromJson(map);
@@ -408,6 +468,7 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("無法更新資料 請檢察網路！"),));
       }
+
     });
   }
 

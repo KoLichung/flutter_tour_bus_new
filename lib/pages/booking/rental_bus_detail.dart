@@ -171,13 +171,14 @@ class _RentalBusDetailState extends State<RentalBusDetail> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Align(alignment: Alignment.centerLeft,child: Text('原價')),
-                  Text('\$${_getDaysInterval()*15000}',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,decoration: TextDecoration.lineThrough,color: Colors.red),),
-                  const SizedBox(height: 10),
-                  Text('APP統一價'),
-                  Text('\$${_getDaysInterval()*11000}',style: Theme.of(context).textTheme.subtitle2),
-                  const SizedBox(height: 10),
-                  Text('訂金'),
+                  // const Align(alignment: Alignment.centerLeft,child: Text('原價')),
+                  // Text('\$${_getDaysInterval()*15000}',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,decoration: TextDecoration.lineThrough,color: Colors.red),),
+                  // const SizedBox(height: 10),
+                  // Text('APP統一價'),
+                  // Text('\$${_getDaysInterval()*11000}',style: Theme.of(context).textTheme.subtitle2),
+                  // const SizedBox(height: 10),
+                  // Text('訂金'),
+                  const Align(alignment: Alignment.centerLeft,child: Text('訂金')),
                   Text('\$${_getDaysInterval()*2500}',style: Theme.of(context).textTheme.subtitle2),
                 ],
               ),
@@ -214,7 +215,7 @@ class _RentalBusDetailState extends State<RentalBusDetail> {
   }
 
   int _getDaysInterval(){
-    return -widget.startDate.difference(widget.endDate).inDays;
+    return (-widget.startDate.difference(widget.endDate).inDays)+1;
   }
 
   Future _fetchBusImages(int busId) async {
@@ -224,7 +225,7 @@ class _RentalBusDetailState extends State<RentalBusDetail> {
 
       final queryParameters = {
         // "bus_id" : busId.toString(),
-        "bus_id" : "15",
+        "bus_id" : widget.theBus.id.toString(),
       };
 
       final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));

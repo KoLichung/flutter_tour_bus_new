@@ -7,9 +7,10 @@ class User {
   String? address;
   String? vehicalLicence;
   String? vehicalOwner;
-  String? vehicalEngineNumber;
-  String? vehicalBodyNumber;
+  // String? vehicalEngineNumber;
+  // String? vehicalBodyNumber;
   String? vehicalLicenceImage;
+  String? driverLicenceImage;
   bool? isGottenLineId;
 
   User(
@@ -21,9 +22,10 @@ class User {
         this.address,
         this.vehicalLicence,
         this.vehicalOwner,
-        this.vehicalEngineNumber,
-        this.vehicalBodyNumber,
+        // this.vehicalEngineNumber,
+        // this.vehicalBodyNumber,
         this.vehicalLicenceImage,
+        this.driverLicenceImage,
         this.isGottenLineId});
 
   User.fromJson(Map<String, dynamic> json) {
@@ -55,21 +57,28 @@ class User {
     }else{
       vehicalOwner = "";
     }
-    if(json['vehicalEngineNumber']!=null){
-      vehicalEngineNumber = json['vehicalEngineNumber'];
-    }else{
-      vehicalEngineNumber = "";
-    }
-    if(json['vehicalBodyNumber']!=null){
-      vehicalBodyNumber = json['vehicalBodyNumber'];
-    }else{
-      vehicalBodyNumber = "";
-    }
+    // if(json['vehicalEngineNumber']!=null){
+    //   vehicalEngineNumber = json['vehicalEngineNumber'];
+    // }else{
+    //   vehicalEngineNumber = "";
+    // }
+    // if(json['vehicalBodyNumber']!=null){
+    //   vehicalBodyNumber = json['vehicalBodyNumber'];
+    // }else{
+    //   vehicalBodyNumber = "";
+    // }
     if(json['vehicalLicenceImage']!=null){
       vehicalLicenceImage = json['vehicalLicenceImage'];
     }else{
       vehicalLicenceImage = "";
     }
+
+    if(json['driverLicenceImage']!=null){
+      driverLicenceImage = json['driverLicenceImage'];
+    }else{
+      driverLicenceImage = "";
+    }
+
     isGottenLineId = json['is_gotten_line_id'];
   }
 
@@ -83,9 +92,10 @@ class User {
     data['address'] = this.address;
     data['vehicalLicence'] = this.vehicalLicence;
     data['vehicalOwner'] = this.vehicalOwner;
-    data['vehicalEngineNumber'] = this.vehicalEngineNumber;
-    data['vehicalBodyNumber'] = this.vehicalBodyNumber;
+    // data['vehicalEngineNumber'] = this.vehicalEngineNumber;
+    // data['vehicalBodyNumber'] = this.vehicalBodyNumber;
     data['vehicalLicenceImage'] = this.vehicalLicenceImage;
+    data['driverLicenceImage'] = this.driverLicenceImage;
     data['is_gotten_line_id'] = this.isGottenLineId;
     return data;
   }

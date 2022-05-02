@@ -11,10 +11,11 @@ class Bus {
   int? vehicalSeats;
   String? vehicalLicence;
   String? vehicalOwner;
-  String? vehicalEngineNumber;
-  String? vehicalBodyNumber;
+  // String? vehicalEngineNumber;
+  // String? vehicalBodyNumber;
   String? vehicalYearOfManufacture;
   String? vehicalLicenceImage;
+  String? driverLicenceImage;
   bool? isPublish;
   bool? isTop;
   String? coverImage;
@@ -32,10 +33,11 @@ class Bus {
         this.vehicalSeats,
         this.vehicalLicence,
         this.vehicalOwner,
-        this.vehicalEngineNumber,
-        this.vehicalBodyNumber,
+        // this.vehicalEngineNumber,
+        // this.vehicalBodyNumber,
         this.vehicalYearOfManufacture,
         this.vehicalLicenceImage,
+        this.driverLicenceImage,
         this.isPublish,
         this.isTop,
         this.coverImage,
@@ -60,9 +62,14 @@ class Bus {
     }catch(e){
       print(e);
     }
+    try {
+      driverLicenceImage = json['driverLicenceImage'];
+    }catch(e){
+      print(e);
+    }
     vehicalOwner = json['vehicalOwner'];
-    vehicalEngineNumber = json['vehicalEngineNumber'];
-    vehicalBodyNumber = json['vehicalBodyNumber'];
+    // vehicalEngineNumber = json['vehicalEngineNumber'];
+    // vehicalBodyNumber = json['vehicalBodyNumber'];
     vehicalLicence = json['vehicalLicence'];
     vehicalYearOfManufacture = json['vehicalYearOfManufacture'];
 
@@ -94,9 +101,10 @@ class Bus {
     data['vehicalSeats'] = this.vehicalSeats;
     data['vehicalLicence'] = this.vehicalLicence;
     data['vehicalOwner'] = this.vehicalOwner;
-    data['vehicalEngineNumber'] = this.vehicalEngineNumber;
-    data['vehicalBodyNumber'] = this.vehicalBodyNumber;
+    // data['vehicalEngineNumber'] = this.vehicalEngineNumber;
+    // data['vehicalBodyNumber'] = this.vehicalBodyNumber;
     data['vehicalLicenceImage'] = this.vehicalLicenceImage;
+    data['driverLicenceImage'] = this.driverLicenceImage;
     data['vehicalYearOfManufacture'] = this.vehicalYearOfManufacture;
     data['isPublish'] = this.isPublish;
     data['isTop'] = this.isTop;

@@ -22,10 +22,12 @@ class _DriversBusListState extends State<DriversBusList> {
 
   List<Bus> driversBusList =[];
   var formatter = DateFormat("yyyy/MM/dd EEE");
+  bool isLoading = false;
 
   @override
   void initState() {
     // TODO: implement initState
+    isLoading = true;
     _fetchDriversBusList();
     super.initState();
   }
@@ -47,57 +49,46 @@ class _DriversBusListState extends State<DriversBusList> {
               )
             )
         ],),
-      body: Column(
-        children: [
-          driversBusList.isEmpty
-              ? Center(
-                heightFactor: 10,
-                child: CircularProgressIndicator(
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.yellow),
-                  backgroundColor: Colors.yellow[100],
-                ))
-              : ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: driversBusList.length,
-                itemBuilder:(BuildContext context,int i){
-                  return  Column(
-                    children: [
-                      ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
-                        leading:
-                        (driversBusList[i].coverImage!=null)?
-                        Container(
-                          width: 100,
-                          child: Image.network(driversBusList[i].coverImage!,fit: BoxFit.cover,),
-                        ):
-                        Container(
-                          width: 100,
-                        ),
-                        title: Text(driversBusList[i].title!),
-                        subtitle:
-                        (driversBusList[i].recentStartDate != null)?
-                        Text('最近出租日： \n${formatter.format(driversBusList[i].recentStartDate!)}~${formatter.format(driversBusList[i].recentEndDate!)}',)
-                        :
-                        const Text('尚無出租'),
-                        onTap: () async {
-                          // Navigator.pushNamed(context, '/drivers_bus_detail');
-                          final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>  DriversBusDetail(bus: driversBusList[i]),
-                              ));
+      body: ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: driversBusList.length,
+          itemBuilder:(BuildContext context,int i){
+            return  Column(
+              children: [
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+                  leading:
+                  (driversBusList[i].coverImage!=null)?
+                  Container(
+                    width: 100,
+                    child: Image.network(driversBusList[i].coverImage!,fit: BoxFit.cover,),
+                  ):
+                  Container(
+                    width: 100,
+                  ),
+                  title: Text(driversBusList[i].title!),
+                  subtitle:
+                  (driversBusList[i].recentStartDate != null)?
+                  Text('最近出租日： \n${formatter.format(driversBusList[i].recentStartDate!)}~${formatter.format(driversBusList[i].recentEndDate!)}',)
+                      :
+                  const Text('尚無出租'),
+                  onTap: () async {
+                    // Navigator.pushNamed(context, '/drivers_bus_detail');
+                    final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>  DriversBusDetail(bus: driversBusList[i]),
+                        ));
 
-                          if (result=='refresh'){
-                            print('refresh');
-                            _fetchDriversBusList();
-                          }
-                        },
-                      ),
-                      const Divider(color: AppColor.lightGrey,)],);
-              }),
-        ],
-      ),
+                    if (result=='refresh'){
+                      print('refresh');
+                      _fetchDriversBusList();
+                    }
+                  },
+                ),
+                const Divider(color: AppColor.lightGrey,)],);
+          }),
     );
   }
 
@@ -116,7 +107,6 @@ class _DriversBusListState extends State<DriversBusList> {
         List<Bus> data = List<Bus>.from(parsedListJson.map((i) => Bus.fromJson(i)));
 
         driversBusList = data;
-
         setState(() {});
 
       }

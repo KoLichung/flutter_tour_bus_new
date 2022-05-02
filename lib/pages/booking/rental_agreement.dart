@@ -187,8 +187,8 @@ class _RentalAgreementState extends State<RentalAgreement> {
                     ],),
                     Align(alignment: Alignment.centerLeft,child: Text('${DateFormat('MM / dd EEE').format(widget.startDate)} - ${DateFormat('MM / dd EEE').format(widget.endDate)}')),
                     Row(children: [
-                      const Align(alignment: Alignment.centerLeft,child: Text('App優惠價 '),),
-                      Align(alignment: Alignment.centerLeft,child: Text('\$${_getDaysInterval()*11000}',style: Theme.of(context).textTheme.subtitle2,),),
+                      // const Align(alignment: Alignment.centerLeft,child: Text('App優惠價 '),),
+                      // Align(alignment: Alignment.centerLeft,child: Text('\$${_getDaysInterval()*11000}',style: Theme.of(context).textTheme.subtitle2,),),
                       Align(alignment: Alignment.centerLeft,child: Text(' (訂金 ${_getDaysInterval()*2500})'),),
                     ],),
 
@@ -227,7 +227,7 @@ class _RentalAgreementState extends State<RentalAgreement> {
   }
 
   int _getDaysInterval(){
-    return -widget.startDate.difference(widget.endDate).inDays;
+    return (-widget.startDate.difference(widget.endDate).inDays)+1;
   }
 
   Future _httpPostCreateOrder(Order theOrder, String token) async {

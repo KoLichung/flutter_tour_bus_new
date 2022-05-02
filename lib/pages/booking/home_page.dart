@@ -218,7 +218,7 @@ class _HomePageState extends State<HomePage> {
             controller: _dateRangePickerController,
             view: DateRangePickerView.month,
             monthViewSettings: const DateRangePickerMonthViewSettings(
-                firstDayOfWeek: 1,
+                firstDayOfWeek: 7,
                 ),
             headerHeight: 60,
             headerStyle: const DateRangePickerHeaderStyle(
