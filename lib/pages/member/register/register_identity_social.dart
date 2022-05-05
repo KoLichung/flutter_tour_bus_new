@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_tour_bus_new/pages/member/register/register_identity_owner_dialog.dart';
 
 import 'package:flutter_tour_bus_new/color.dart';
 import 'package:flutter_tour_bus_new/widgets/custom_elevated_button.dart';
@@ -86,44 +87,49 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
                 color: AppColor.yellow,
                 onPressed: (){
 
+                  showDialog(
+                      context: context,
+                      builder: (_){
+                        return RegisterIdentityOwnerDialog();});
 
-                    if(_userIdentity == UserIdentity.passenger){
-                      if(userNameController.text ==''){
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("名稱不可空白！"),));
-                      }else{
-                        User user = User(name: userNameController.text, phone: userPhoneTextController.text);
-                        _postCreateUser(user, widget.lineId, false);
-                        isLoading = true;
-                        setState(() {});
-                      }
-                    }else if(_userIdentity == UserIdentity.driver){
-                      if(isOwnerAgreementChecked){
-                        if(userNameController.text == '' || companyTextController.text == '' ||
-                            companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業者各項資料不可空白！"),));
-                        }else if(licenseImage == null){
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
-                        }else if(driverlicenseImage == null){
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳車主駕照照片！"),));
-                        }else{
-                          User user = User(
-                              name: userNameController.text,
-                              phone: userPhoneTextController.text,
-                              company: companyTextController.text,
-                              address: companyAddressTextController.text,
-                              vehicalLicence: vehicalLicenceTextController.text,
-                              vehicalOwner: vehicalOwnerTextController.text,
-                              // vehicalEngineNumber: vehicalEngineNumberTextController.text,
-                              // vehicalBodyNumber: vehicalBodyNumberTextController.text
-                          );
-                          _postCreateUser(user, widget.lineId, true);
-                          isLoading = true;
-                          setState(() {});
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("您尚未同意瀏覽車業者規範！"),));
-                      }
-                    }
+
+                    // if(_userIdentity == UserIdentity.passenger){
+                    //   if(userNameController.text ==''){
+                    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("名稱不可空白！"),));
+                    //   }else{
+                    //     User user = User(name: userNameController.text, phone: userPhoneTextController.text);
+                    //     _postCreateUser(user, widget.lineId, false);
+                    //     isLoading = true;
+                    //     setState(() {});
+                    //   }
+                    // }else if(_userIdentity == UserIdentity.driver){
+                    //   if(isOwnerAgreementChecked){
+                    //     if(userNameController.text == '' || companyTextController.text == '' ||
+                    //         companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
+                    //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業者各項資料不可空白！"),));
+                    //     }else if(licenseImage == null){
+                    //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
+                    //     }else if(driverlicenseImage == null){
+                    //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳車主駕照照片！"),));
+                    //     }else{
+                    //       User user = User(
+                    //           name: userNameController.text,
+                    //           phone: userPhoneTextController.text,
+                    //           company: companyTextController.text,
+                    //           address: companyAddressTextController.text,
+                    //           vehicalLicence: vehicalLicenceTextController.text,
+                    //           vehicalOwner: vehicalOwnerTextController.text,
+                    //           // vehicalEngineNumber: vehicalEngineNumberTextController.text,
+                    //           // vehicalBodyNumber: vehicalBodyNumberTextController.text
+                    //       );
+                    //       _postCreateUser(user, widget.lineId, true);
+                    //       isLoading = true;
+                    //       setState(() {});
+                    //     }
+                    //   } else {
+                    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("您尚未同意瀏覽車業者規範！"),));
+                    //   }
+                    // }
                 },
               ),
               const SizedBox(height: 20,),
@@ -179,21 +185,21 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
                     alignment:Alignment.centerLeft,
                     child: Text('* 業者資訊')),
               ),
-              Row(children: [
-                Checkbox(
-                    visualDensity: const VisualDensity(
-                      horizontal: VisualDensity.minimumDensity,
-                    ),
-                    value: isOwnerAgreementChecked,
-                    onChanged: (bool? value){
-                      setState(() {
-                        isOwnerAgreementChecked = value!;
-                      });
-                    }),
-                const Text('我同意下列遊覽車業者規範：')
-              ],),
-              const Text('在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。使用平台服務費為出車一天\$1000元。'),
-              const SizedBox(height: 10,),
+              // Row(children: [
+              //   Checkbox(
+              //       visualDensity: const VisualDensity(
+              //         horizontal: VisualDensity.minimumDensity,
+              //       ),
+              //       value: isOwnerAgreementChecked,
+              //       onChanged: (bool? value){
+              //         setState(() {
+              //           isOwnerAgreementChecked = value!;
+              //         });
+              //       }),
+              //   const Text('我同意下列遊覽車業者規範：')
+              // ],),
+              // const Text('在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。使用平台服務費為出車一天\$1000元。'),
+              // const SizedBox(height: 10,),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(children: [

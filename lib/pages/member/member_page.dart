@@ -175,7 +175,7 @@ class _MemberPageState extends State<MemberPage> {
                   ),
                   const Align(alignment:Alignment.centerLeft,child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 10),
-                    child: Text('業者功能：'),
+                    child: Text('業者功能：\n在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。使用平台服務費為出車一天 \$1000元。'),
                   )),
                   const Divider(
                     color: Color(0xffe5e5e5),
