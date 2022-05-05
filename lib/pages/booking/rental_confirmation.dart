@@ -34,8 +34,8 @@ class _RentalConfirmationState extends State<RentalConfirmation> {
               ),
               const Text(
                   '恭喜您，下訂完成！'
-                  '\n請等待業主決定是否接單，\n我們會用簡訊通知您。'
-              '\n您也可以隨時回來查看訂單狀況'
+                  '\n請等待業者決定是否接單。'
+              '\n您可以隨時回來查看訂單狀況'
               '\n( 會員中心 / 我的訂單 )'
               '\n感謝您~', textAlign: TextAlign.center,),
               const SizedBox(height: 40,),

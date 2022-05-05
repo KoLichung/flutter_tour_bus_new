@@ -143,10 +143,9 @@ class _HomePageState extends State<HomePage> {
                   title: '開始搜尋',
                   onPressed: (){
                     if (numberOfPeopleController.text == '') {
-                      const snackBar =SnackBar(
-                        content: Text('請輸入搭車人數！'),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("請輸入搭車人數！"),));
+                    } else if(int.parse(numberOfPeopleController.text)>43){
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("搜索人數必須小於 43 人！"),));
                     } else {
                       Navigator.push(
                           context,
@@ -272,6 +271,7 @@ class _HomePageState extends State<HomePage> {
       onChanged: (String? value){
         setState(() {
           String numberOfPeople = value!;
+
           Provider.of<UserModel>(context, listen: false).changeBookingNumberOfPeople(numberOfPeople);
         });
       },

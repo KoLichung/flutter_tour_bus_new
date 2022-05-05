@@ -175,7 +175,7 @@ class _MemberPageState extends State<MemberPage> {
                   ),
                   const Align(alignment:Alignment.centerLeft,child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 10),
-                    child: Text('業主功能：'),
+                    child: Text('業者功能：'),
                   )),
                   const Divider(
                     color: Color(0xffe5e5e5),

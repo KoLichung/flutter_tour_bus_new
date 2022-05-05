@@ -126,7 +126,7 @@ class _EditUserDetailState extends State<EditUserDetail> {
                   }else if(_userIdentity == UserIdentity.driver){
                     if(userNameController.text == '' || userPhoneTextController.text == '' || companyTextController.text == '' ||
                         companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業主各項資料不可空白！"),));
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業者各項資料不可空白！"),));
                     }else if(licenseImage == null && currentImageUrl == null){
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
                     }else if(licenseImage == null && currentImageUrl == null){
@@ -201,14 +201,14 @@ class _EditUserDetailState extends State<EditUserDetail> {
                 padding: EdgeInsets.fromLTRB(0,20,0,10),
                 child: Align(
                     alignment:Alignment.centerLeft,
-                    child: Text('* 業主資訊')),
+                    child: Text('* 業者資訊')),
               ),
               Row(
                 children: const [
                   Text('我已同意下列遊覽車業者規範：'),
                 ],
               ),
-              const Text('在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。使用平台服務費為出車一天\$500元。'),
+              const Text('在此上架之遊覽車業者應符合國家遊覽車業者規定，且無不法情事，如有違反經查證屬實將強制下架該遊覽車業者。使用平台服務費為出車一天\$1000元。'),
               const SizedBox(height: 10,),
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),

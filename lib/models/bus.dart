@@ -47,7 +47,11 @@ class Bus {
   Bus.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     user = json['user'];
-    title = json['title'];
+    try{
+      title = json['title'].toString().replaceAll(RegExp('[0-9]'), "");
+    }catch(e){
+      title = json['title'];
+    }
     try{
       lat = double.parse(json['lat']);
       lng = double.parse(json['lng']);

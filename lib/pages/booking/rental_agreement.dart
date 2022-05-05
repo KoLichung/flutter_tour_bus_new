@@ -41,7 +41,7 @@ class _RentalAgreementState extends State<RentalAgreement> {
 
     var rentalDays = (widget.endDate.difference(widget.startDate)).inDays+1;
 
-    int finalPayment = _getDaysInterval()*11000 - _getDaysInterval()*2500;
+    int finalPayment = _getDaysInterval()*11000 - _getDaysInterval()*1000;
 
     String agreementText = '''立契約書人
 承租人（以下簡稱甲方）${userModel.user?.name}
@@ -54,7 +54,7 @@ class _RentalAgreementState extends State<RentalAgreement> {
 租金計算（含營業稅）同價格表。
 
 第 三 條  
-租金給付時間：於簽約時預付定金（不得高於租金總額百分之二十）新臺幣 ${_getDaysInterval()*2500} 元，租金餘額新臺幣 ${finalPayment.toString()} 元於七日內給付。
+租金給付時間：於簽約時預付定金（不得高於租金總額百分之二十）新臺幣 ${_getDaysInterval()*1000} 元，租金餘額新臺幣 ${finalPayment.toString()} 元於行程結束後給付。
 
 第 四 條  
 車輛基本資料：
@@ -104,9 +104,9 @@ class _RentalAgreementState extends State<RentalAgreement> {
 
 第十三條　　
 本契約簽訂後，如因可歸責於乙方之事由而解約者，乙方應加倍返還定金；如因可歸責於甲方之事由而解約者，甲方得依下列標準要求乙方返還已繳之定金：
-一、預定用車日十日前通知解約，得請求返還已付定金百分之百。
-二、預定用車日九至七日內通知解約，得請求返還已付定金百分之五十。
-三、預定用車日六日內通知解約，不得要求返還已付定金。
+一、預定用車日 30 日前通知解約，得請求返還已付定金百分之百，需扣除手續費。
+二、預定用車日 15 日內通知解約，得請求返還已付定金百分之五十，需扣除手續費。
+三、預定用車日 7 日內通知解約，不得要求返還已付定金，需扣除手續費。
 
 第十四條　　
 因臨時道路障礙、天災事變等不可抗力因素或其他不可歸責於雙方當事人之事由，致乙方無法出車，甲方得解除契約，並請求退還其預付定金。
@@ -189,7 +189,7 @@ class _RentalAgreementState extends State<RentalAgreement> {
                     Row(children: [
                       // const Align(alignment: Alignment.centerLeft,child: Text('App優惠價 '),),
                       // Align(alignment: Alignment.centerLeft,child: Text('\$${_getDaysInterval()*11000}',style: Theme.of(context).textTheme.subtitle2,),),
-                      Align(alignment: Alignment.centerLeft,child: Text(' (訂金 ${_getDaysInterval()*2500})'),),
+                      Align(alignment: Alignment.centerLeft,child: Text(' (訂金 ${_getDaysInterval()*1000})'),),
                     ],),
 
                   ],
@@ -213,7 +213,7 @@ class _RentalAgreementState extends State<RentalAgreement> {
                     theOrder.depatureCity = widget.fromCity;
                     theOrder.destinationCity = widget.toCity;
                     theOrder.orderMoney = _getDaysInterval()*11000;
-                    theOrder.depositMoney = _getDaysInterval()*2500;
+                    theOrder.depositMoney = _getDaysInterval()*1000;
                     _httpPostCreateOrder(theOrder, userModel.token!);
                   }else{
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("請先勾選同意租賃合約書！"),));

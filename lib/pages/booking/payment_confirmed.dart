@@ -46,9 +46,9 @@ class _PaymentConfirmedState extends State<PaymentConfirmed> {
               ),
               Text('付款完成！',style: Theme.of(context).textTheme.subtitle2,),
               Text(
-                    '\n業主是：\n${_ownerInfo!.company!}'
+                    '\n業者是：\n${_ownerInfo!.company!}'
                     '\n${_ownerInfo!.address!}\n聯絡人：${_ownerInfo!.name!} \n電話：${_ownerInfo!.phone!}'
-                    '\n業主會儘速聯絡喔~ '
+                    '\n業者會儘速聯絡喔~ '
                     '\n感謝您~', textAlign: TextAlign.center,),
               const SizedBox(height: 40,),
               CustomElevatedButton(

@@ -179,7 +179,7 @@ class _RentalBusDetailState extends State<RentalBusDetail> {
                   // const SizedBox(height: 10),
                   // Text('訂金'),
                   const Align(alignment: Alignment.centerLeft,child: Text('訂金')),
-                  Text('\$${_getDaysInterval()*2500}',style: Theme.of(context).textTheme.subtitle2),
+                  Text('\$${_getDaysInterval()*1000}',style: Theme.of(context).textTheme.subtitle2),
                 ],
               ),
             ),

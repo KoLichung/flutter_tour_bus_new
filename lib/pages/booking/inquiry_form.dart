@@ -177,7 +177,7 @@ class _InquiryFormState extends State<InquiryForm> {
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("人數不可空白！"),));
                         }
                     },),
-                  const Center(child: Text('(如果有業主能承接，會主動聯絡您)',style: TextStyle(fontSize: 14),)),
+                  const Center(child: Text('(如果有業者能承接，會主動聯絡您)',style: TextStyle(fontSize: 14),)),
                 ]
             ),
           ),

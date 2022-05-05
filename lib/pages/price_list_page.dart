@@ -38,7 +38,7 @@ class _PriceListPageState extends State<PriceListPage> {
 
 里程數每天 300 公里，可合併天數計算。超過 20 公里加收 \$1000，未滿 20 公里以 20 公里計算。
 
-確定訂車後需付訂金 \$2500/天 合約才會生效，行程結束時需付清尾款。''';
+確定訂車後需付訂金 \$1000/天 合約才會生效，行程結束時需付清尾款。''';
 
   @override
   Widget build(BuildContext context) {
