@@ -25,13 +25,14 @@ class MemberPage extends StatefulWidget {
 class _MemberPageState extends State<MemberPage> {
 
   int lengthOfAnnounce = 0;
+  String adminPhone = "0912585506";
 
   @override
   void initState() {
     super.initState();
     print('at init');
     var userModel = context.read<UserModel>();
-    if(userModel.isLogin() && userModel.user!.isOwner!){
+    if(userModel.isLogin() && userModel.user!.isOwner! && userModel.user!.phone! == adminPhone){
       _httpGetAnnouncements();
     }
   }
@@ -68,7 +69,10 @@ class _MemberPageState extends State<MemberPage> {
                       onPressed: () async {
                          final result = await Navigator.pushNamed(context, '/login_register');
                          if(result=="ok"){
-                           _httpGetAnnouncements();
+                           var userModel = context.read<UserModel>();
+                           if(userModel.user!.phone == adminPhone){
+                             _httpGetAnnouncements();
+                           }
                          }
                       },
                       child: const Text('登入', style: TextStyle(fontSize: 16)),
@@ -166,7 +170,7 @@ class _MemberPageState extends State<MemberPage> {
                       ),),]),
             ),
 
-            Consumer<UserModel>(builder: (context, userModel, child) => (userModel.isLogin() && userModel.user!.isOwner!) ?
+            Consumer<UserModel>(builder: (context, userModel, child) => (userModel.isLogin() && userModel.user!.isOwner! && userModel.user!.isPassed!) ?
               Column(
                 children: [
                   const Divider(
@@ -193,49 +197,74 @@ class _MemberPageState extends State<MemberPage> {
                       Navigator.pushNamed(context, '/bus_list');
                     },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 0),
-                    child: Row(
-                        children:[
-                          const Expanded(flex:3,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 30.0),
-                                child: Text('租賃需求'),
-                              )),
-                          Expanded(
-                              flex: 3,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6,vertical: 3),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                    color: AppColor.yellow,
-                                    width: 1,
+                  (userModel.user!.phone == adminPhone)?
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 0),
+                        child: Row(
+                            children:[
+                              const Expanded(flex:3,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 30.0),
+                                    child: Text('租賃需求'),
+                                  )),
+                              Expanded(
+                                  flex: 3,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6,vertical: 3),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: AppColor.yellow,
+                                        width: 1,
 
-                                  ),
+                                      ),
+                                    ),
+
+                                    child: Text('有 $lengthOfAnnounce 則新需求', style: TextStyle(color: AppColor.yellow),),
+                                  )
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: IconButton(
+                                  // constraints: BoxConstraints(),
+                                  // padding: EdgeInsets.zero,
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/inquiry_notice');
+                                  },
+                                  icon: const Icon(Icons.arrow_forward_ios, color:Colors.grey),
                                 ),
+                              ),
 
-                                child: Text('今日有 $lengthOfAnnounce 則新需求', style: TextStyle(color: AppColor.yellow),),
-                              )
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: IconButton(
-                              // constraints: BoxConstraints(),
-                              // padding: EdgeInsets.zero,
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/inquiry_notice');
-                              },
-                              icon: const Icon(Icons.arrow_forward_ios, color:Colors.grey),
-                            ),
-                          ),
+                            ]
 
-                        ]
-
-                    ),
+                        ),
+                      ),
+                      const Divider(
+                        thickness: 1,
+                        color: Color(0xffe5e5e5),
+                      ),
+                    ],
+                  )
+                  :
+                  SizedBox(),
+                ],
+              )
+                :
+              (userModel.isLogin() && userModel.user!.isOwner! && !userModel.user!.isPassed!)?
+              Column(
+                children: const [
+                  Divider(
+                    color: AppColor.superLightGrey,
+                    thickness: 8,
                   ),
-                  const Divider(
+                  Align(alignment:Alignment.centerLeft,child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 10),
+                    child: Text('業者功能：\n業者功能尚未開啟，請等待審核通過或聯繫管理員。'),
+                  )),
+                  Divider(
                     thickness: 1,
                     color: Color(0xffe5e5e5),
                   ),

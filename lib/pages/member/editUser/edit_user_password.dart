@@ -59,6 +59,7 @@ class _EditUserPasswordState extends State<EditUserPassword> {
                         controller: newPasswordAgainController,
                         isObscureText: true,
                       ),
+                      Text("(密碼須為英文字母或數字)"),
                     ]
                 ),
             ),

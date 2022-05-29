@@ -18,8 +18,9 @@ import '../../../notifier_model/user_model.dart';
 class RegisterIdentitySocial extends StatefulWidget {
   final String displayName;
   final String lineId;
+  final String appleId;
 
-  const RegisterIdentitySocial({Key? key, required this.displayName, required this.lineId}) : super(key: key);
+  const RegisterIdentitySocial({Key? key, required this.displayName, required this.lineId, required this.appleId}) : super(key: key);
 
   @override
   _RegisterIdentitySocialState createState() => _RegisterIdentitySocialState();
@@ -42,7 +43,7 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
   UserIdentity? _userIdentity = UserIdentity.passenger;
 
   bool driverFormIsVisible = false;
-  bool isOwnerAgreementChecked = false;
+  // bool isOwnerAgreementChecked = false;
 
   XFile? driverlicenseImage;
   XFile? licenseImage;
@@ -85,51 +86,51 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
               CustomElevatedButton(
                 title: '註冊',
                 color: AppColor.yellow,
-                onPressed: (){
-
-                  showDialog(
-                      context: context,
-                      builder: (_){
-                        return RegisterIdentityOwnerDialog();});
-
-
-                    // if(_userIdentity == UserIdentity.passenger){
-                    //   if(userNameController.text ==''){
-                    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("名稱不可空白！"),));
-                    //   }else{
-                    //     User user = User(name: userNameController.text, phone: userPhoneTextController.text);
-                    //     _postCreateUser(user, widget.lineId, false);
-                    //     isLoading = true;
-                    //     setState(() {});
-                    //   }
-                    // }else if(_userIdentity == UserIdentity.driver){
-                    //   if(isOwnerAgreementChecked){
-                    //     if(userNameController.text == '' || companyTextController.text == '' ||
-                    //         companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
-                    //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業者各項資料不可空白！"),));
-                    //     }else if(licenseImage == null){
-                    //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
-                    //     }else if(driverlicenseImage == null){
-                    //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳車主駕照照片！"),));
-                    //     }else{
-                    //       User user = User(
-                    //           name: userNameController.text,
-                    //           phone: userPhoneTextController.text,
-                    //           company: companyTextController.text,
-                    //           address: companyAddressTextController.text,
-                    //           vehicalLicence: vehicalLicenceTextController.text,
-                    //           vehicalOwner: vehicalOwnerTextController.text,
-                    //           // vehicalEngineNumber: vehicalEngineNumberTextController.text,
-                    //           // vehicalBodyNumber: vehicalBodyNumberTextController.text
-                    //       );
-                    //       _postCreateUser(user, widget.lineId, true);
-                    //       isLoading = true;
-                    //       setState(() {});
-                    //     }
-                    //   } else {
-                    //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("您尚未同意瀏覽車業者規範！"),));
-                    //   }
-                    // }
+                onPressed: () async {
+                    if(_userIdentity == UserIdentity.passenger){
+                      if(userNameController.text ==''){
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("名稱不可空白！"),));
+                      }else{
+                        User user = User(name: userNameController.text, phone: userPhoneTextController.text);
+                        if(widget.lineId!=""){
+                          _postCreateUser(user, widget.lineId, false);
+                        }else if(widget.appleId!=""){
+                          _postCreateAppleUser(user, widget.appleId, false);
+                        }
+                        isLoading = true;
+                        setState(() {});
+                      }
+                    }else if(_userIdentity == UserIdentity.driver){
+                      final result = await showDialog(context: context,builder: (_){return RegisterIdentityOwnerDialog();});
+                      if(result.toString() == "confirmRegister"){
+                        if(userNameController.text == '' || companyTextController.text == '' ||
+                            companyAddressTextController.text == '' || vehicalLicenceTextController.text == '' || vehicalOwnerTextController.text == ''){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("業者各項資料不可空白！"),));
+                        }else if(licenseImage == null){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳行照照片！"),));
+                        }else if(driverlicenseImage == null){
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("需上傳車主駕照照片！"),));
+                        }else{
+                          User user = User(
+                            name: userNameController.text,
+                            phone: userPhoneTextController.text,
+                            company: companyTextController.text,
+                            address: companyAddressTextController.text,
+                            vehicalLicence: vehicalLicenceTextController.text,
+                            vehicalOwner: vehicalOwnerTextController.text,
+                            // vehicalEngineNumber: vehicalEngineNumberTextController.text,
+                            // vehicalBodyNumber: vehicalBodyNumberTextController.text
+                          );
+                          if(widget.lineId!=""){
+                            _postCreateUser(user, widget.lineId, false);
+                          }else if(widget.appleId!=""){
+                            _postCreateAppleUser(user, widget.appleId, false);
+                          }
+                          isLoading = true;
+                          setState(() {});
+                        }
+                    }
+                  }
                 },
               ),
               const SizedBox(height: 20,),
@@ -353,23 +354,93 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
           body: jsonEncode(queryParameters)
       );
 
+      if(response.statusCode == 201){
+        Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+        User theUser = User.fromJson(map);
+
+        String? token = await _getUserTokenFromLine(lineId);
+
+        var userModel = context.read<UserModel>();
+        userModel.setUser(theUser);
+        userModel.token = token;
+        userModel.isLineLogin = true;
+
+        if(isOwner && licenseImage != null){
+          _uploadLicenceImage(licenseImage, driverlicenseImage, token!);
+        }else{
+          Navigator.popUntil(context, ModalRoute.withName('/login_register'));
+        }
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("此電話號碼可能已註冊，更改電話試試！"),));
+        isLoading = false;
+        setState(() {});
+      }
+
       // print(response.body);
 
-      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
-      User theUser = User.fromJson(map);
+    } catch (e) {
+      print(e);
+      return "error";
+    }
+  }
 
-      String? token = await _getUserTokenFromLine(lineId);
+  Future _postCreateAppleUser(User user, String appleId, bool isOwner) async {
+    String path = Service.PATH_CREATE_USER;
 
-      var userModel = context.read<UserModel>();
-      userModel.setUser(theUser);
-      userModel.token = token;
-      userModel.isLineLogin = true;
-
-      if(isOwner && licenseImage != null){
-        _uploadLicenceImage(licenseImage, driverlicenseImage, token!);
+    try {
+      Map queryParameters = {};
+      if(!isOwner) {
+        queryParameters = {
+          'phone': user.phone,
+          'name': user.name,
+          'password': '00000',
+          'apple_id': appleId,
+        };
       }else{
-        Navigator.popUntil(context, ModalRoute.withName('/login_register'));
+        queryParameters['phone'] = user.phone;
+        queryParameters['name'] = user.name;
+        queryParameters['isOwner'] = 'true';
+        queryParameters['company'] = user.company;
+        queryParameters['address'] = user.address;
+        queryParameters['vehicalLicence'] = user.vehicalLicence;
+        queryParameters['vehicalOwner'] = user.vehicalOwner;
+        // queryParameters['vehicalEngineNumber'] = user.vehicalEngineNumber;
+        // queryParameters['vehicalBodyNumber'] = user.vehicalBodyNumber;
+        queryParameters['apple_id'] = appleId;
+        queryParameters['password'] = '00000';
       }
+
+      final response = await http.post(
+          Service.standard(path: path),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(queryParameters)
+      );
+
+      if(response.statusCode == 201){
+        Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+        User theUser = User.fromJson(map);
+
+        String? token = await _getUserTokenFromApple(appleId);
+
+        var userModel = context.read<UserModel>();
+        userModel.setUser(theUser);
+        userModel.token = token;
+        userModel.isLineLogin = true;
+
+        if(isOwner && licenseImage != null){
+          _uploadLicenceImage(licenseImage, driverlicenseImage, token!);
+        }else{
+          Navigator.popUntil(context, ModalRoute.withName('/login_register'));
+        }
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("此電話號碼可能已註冊，更改電話試試！"),));
+        isLoading = false;
+        setState(() {});
+      }
+
+      // print(response.body);
 
     } catch (e) {
       print(e);
@@ -384,6 +455,37 @@ class _RegisterIdentitySocialState extends State<RegisterIdentitySocial> {
         'phone': '00000',
         'password': '00000',
         'line_id': lineId,
+      };
+
+      final response = await http.post(
+          Service.standard(path: path),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(queryParameters)
+      );
+
+      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+      if(map['token']!=null){
+        String token = map['token'];
+        return token;
+      }else{
+        print(response.body);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> _getUserTokenFromApple(String appleId) async {
+    String path = Service.PATH_USER_TOKEN;
+    try {
+      Map queryParameters = {
+        'phone': '00000',
+        'password': '00000',
+        'apple_id': appleId,
       };
 
       final response = await http.post(

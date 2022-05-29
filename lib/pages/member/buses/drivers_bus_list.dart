@@ -41,8 +41,12 @@ class _DriversBusListState extends State<DriversBusList> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/add_new_bus');
+                onTap: () async {
+                  final result = await Navigator.pushNamed(context, '/add_new_bus');
+                  if(result.toString()=="success"){
+                    isLoading = true;
+                    _fetchDriversBusList();
+                  }
                 },
                 child:
                 const Text('新增車輛', style: TextStyle(fontSize: 15))

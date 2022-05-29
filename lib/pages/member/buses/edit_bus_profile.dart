@@ -92,7 +92,9 @@ class _EditBusProfileState extends State<EditBusProfile> {
     }
 
     oldLicenseImage = widget.theBus.vehicalLicenceImage!;
-    oldDriverLicenseImage = widget.theBus.driverLicenceImage!;
+    if(widget.theBus.driverLicenceImage!=null) {
+      oldDriverLicenseImage = widget.theBus.driverLicenceImage!;
+    }
 
     for(TourBusImage image in widget.listBusImages){
       if(image.type! == 'exterior'){
@@ -132,6 +134,7 @@ class _EditBusProfileState extends State<EditBusProfile> {
               const SizedBox(height: 20,),
               getBusListStatus(),
               driverInputRow('標題：',carTitleController, false),
+              Container(child: Text("(標題請勿輸入數字)"),width: double.infinity,margin: const EdgeInsets.symmetric(horizontal: 30) ),
               driverInputRow('牌照：',licenseController, false),
               driverInputRow('車主：',ownerController, false),
               // driverInputRow('引擎號碼：',engineNumController, false),
@@ -267,7 +270,7 @@ class _EditBusProfileState extends State<EditBusProfile> {
                   ),
                 ],
               ),
-              imageUploadButtonTitle('外觀照片(1~5張)：'),
+              imageUploadButtonTitle('外觀照片(1~2張)：'),
               Row(
                 children: [
                   ImageUploadButton(
@@ -282,10 +285,10 @@ class _EditBusProfileState extends State<EditBusProfile> {
                         if(pickedFile == null) return;
                         if(pickedFile.isNotEmpty){
                           for(XFile file in pickedFile){
-                            if(newOutLookImageList.length + oldOutLookImageList.length < 5){
+                            if(newOutLookImageList.length + oldOutLookImageList.length < 2){
                               newOutLookImageList.add(file);
                             }else{
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("外觀照片需少於等於 5 張！"),));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("外觀照片需少於等於 2 張！"),));
                             }
                           }
                         }
@@ -361,7 +364,7 @@ class _EditBusProfileState extends State<EditBusProfile> {
                   ),
                 ],
               ),
-              imageUploadButtonTitle('內裝照片(1~5張)：'),
+              imageUploadButtonTitle('內裝照片(1~3張)：'),
               Row(
                 children: [
                   ImageUploadButton(
@@ -376,10 +379,10 @@ class _EditBusProfileState extends State<EditBusProfile> {
                         if(pickedFile == null) return;
                         if(pickedFile.isNotEmpty){
                           for(XFile file in pickedFile){
-                            if(newInteriorImageList.length + oldOutLookImageList.length < 5){
+                            if(newInteriorImageList.length + oldOutLookImageList.length < 3){
                               newInteriorImageList.add(file);
                             }else{
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("內裝照片需少於等於 5 張！"),));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("內裝照片需少於等於 3 張！"),));
                             }
                           }
                         }
@@ -697,8 +700,8 @@ class _EditBusProfileState extends State<EditBusProfile> {
 
   getLocationCity(){
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      padding: EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 6),
       decoration: BoxDecoration(
         border: Border.all(
           color: AppColor.grey,
@@ -728,8 +731,8 @@ class _EditBusProfileState extends State<EditBusProfile> {
   }
   getLocationDistrict(){
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      padding: EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 6),
       decoration: BoxDecoration(
         border: Border.all(
           color: AppColor.grey,

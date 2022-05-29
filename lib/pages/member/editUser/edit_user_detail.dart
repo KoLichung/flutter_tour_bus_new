@@ -253,7 +253,7 @@ class _EditUserDetailState extends State<EditUserDetail> {
                     ),
                     onPressed: () async {
                       final ImagePicker _picker = ImagePicker();
-                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
+                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640, maxHeight: 480);
 
                       if(pickedFile == null) return;
 
@@ -288,7 +288,7 @@ class _EditUserDetailState extends State<EditUserDetail> {
                     ),
                     onPressed: () async {
                       final ImagePicker _picker = ImagePicker();
-                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640);
+                      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 640, maxHeight: 480);
 
                       if(pickedFile == null) return;
 

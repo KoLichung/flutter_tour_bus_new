@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_line_sdk/flutter_line_sdk.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_tour_bus_new/pages/aggreement_tab_page.dart';
 import 'package:flutter_tour_bus_new/pages/member/buses/drivers_bus_detail.dart';
+import 'package:flutter_tour_bus_new/pages/member/resetPassword/reset_password_phone.dart';
 import 'firebase_options.dart';
 import 'package:intl/intl.dart';
 
@@ -129,7 +132,7 @@ class MyApp extends StatelessWidget {
         // '/drivers_bus_detail': (context) => const DriversBusDetail(),
         '/drivers_booking_list': (context) => const DriversBookingList(),
         // '/drivers_booking_detail': (context) => const DriversBookingDetail(),
-
+        '/reset_password_phone': (context) => const ResetPasswordPhone(),
       },
       builder: (context, child){
         return MediaQuery(data: MediaQuery.of(context).copyWith(textScaleFactor: 1.1), child: Container(child: child)
@@ -216,6 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(icon: Icon(Icons.directions_bus_filled_outlined), label: '租遊覽車'),
             BottomNavigationBarItem(icon: Icon(Icons.list_alt_outlined), label: '價位表'),
+            BottomNavigationBarItem(icon: Icon(CupertinoIcons.doc_text), label: '合約書範本'),
             BottomNavigationBarItem(icon: Icon(Icons.face_outlined), label: '會員中心'),
           ],
         ),
@@ -227,7 +231,8 @@ class _MyHomePageState extends State<MyHomePage> {
     switch (index){
       case 0 : { return const HomePage();}
       case 1 : { return const PriceListPage();}
-      case 2 : { return const MemberPage();}
+      case 2 : { return const AgreementTabPage();}
+      case 3 : { return const MemberPage();}
     }
 
   }

@@ -12,43 +12,27 @@ import 'package:intl/intl.dart';
 import 'package:flutter_tour_bus_new/constant.dart';
 import 'package:http/http.dart' as http;
 
-class RentalAgreement extends StatefulWidget {
+class AgreementTabPage extends StatefulWidget {
 
-  final Bus theBus;
-  final String fromCity;
-  final String toCity;
-  final DateTime startDate;
-  final DateTime endDate;
-
-  const RentalAgreement({Key? key, required this.theBus, required this.fromCity, required this.toCity, required this.startDate, required this.endDate}) : super(key: key);
+  const AgreementTabPage({Key? key}): super(key: key);
 
   @override
-  _RentalAgreementState createState() => _RentalAgreementState();
+  _AgreementTabPageState createState() => _AgreementTabPageState();
 }
 
-class _RentalAgreementState extends State<RentalAgreement> {
+class _AgreementTabPageState extends State<AgreementTabPage> {
 
   bool isAgreementChecked = false;
 
   @override
   Widget build(BuildContext context) {
 
-    var userModel = context.read<UserModel>();
-
-    DateFormat formatter = DateFormat('yyyy-MM-dd');
-    String startDate = formatter.format(widget.startDate);
-    String endDate = formatter.format(widget.endDate);
-
-    var rentalDays = (widget.endDate.difference(widget.startDate)).inDays+1;
-
-    int finalPayment = _getDaysInterval()*11000 - _getDaysInterval()*1000;
-
     String agreementText = '''立契約書人
-承租人（以下簡稱甲方）${userModel.user?.name}
-出租人（以下簡稱乙方）${Service.BUS_COMPANY_NAME}，茲為遊覽車租賃事宜，雙方同意本契約條款如下：
+承租人（以下簡稱甲方）xxx
+出租人（以下簡稱乙方）xxx，茲為遊覽車租賃事宜，雙方同意本契約條款如下：
 
 第 一 條  
-本契約租賃車輛（以下簡稱本車輛，不含隨車服務人員）租賃期間自 $startDate 起至 $endDate 止，共計 $rentalDays 天。
+本契約租賃車輛（以下簡稱本車輛，不含隨車服務人員）租賃期間自 xxxx/xx/xx 起至 xxxx/xx/xx 止，共計 x 天。
 
 第 二 條  
 租金計算（含營業稅）同價格表。
@@ -58,9 +42,9 @@ class _RentalAgreementState extends State<RentalAgreement> {
 
 第 四 條  
 車輛基本資料：
-一、車號：${widget.theBus.vehicalLicence}
-二、座位數：${widget.theBus.vehicalSeats}（與行照記載相符）
-三、出廠年份：${widget.theBus.vehicalYearOfManufacture!}
+一、車號：xxx
+二、座位數：xxx（與行照記載相符）
+三、出廠年份：xxxx
 
 第 五 條  
 車輛油費、車輛耗材費及車輛違反公路法、汽車運輸業管理規則及道路交通管理處罰條例等法規之罰鍰費用由乙方負擔。
@@ -134,135 +118,19 @@ class _RentalAgreementState extends State<RentalAgreement> {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('包遊覽車'),
+          title: const Text('合約書範本'),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.fromLTRB(0,20,0,10),
-                padding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
-                height: 500,
-                width: 370,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColor.grey
-                  ),
-                ),
-                child:SingleChildScrollView(
-                    child: Text(agreementText))),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 36),
-                child: Row(children: [
-                  Checkbox(
-                      visualDensity: const VisualDensity(
-                        horizontal: VisualDensity.minimumDensity,
-                      ),
-                      value: isAgreementChecked,
-                      onChanged: (bool? value){
-                        setState(() {
-                          isAgreementChecked = value!;
-                        });
-                      }),
-                  const Text('同意此租賃合約書')
-                ],),
+        body: Container(
+            margin: const EdgeInsets.fromLTRB(10,20,10,10),
+            padding: const EdgeInsets.symmetric(vertical: 12,horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(
+                  color: AppColor.grey
               ),
-              const Divider(
-                color: AppColor.superLightGrey,
-                thickness: 8,
-              ),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 40,vertical: 20),
-                child: Column(
-                  children: [
-                    Align(alignment: Alignment.centerLeft,child: Text('租車內容：',style: Theme.of(context).textTheme.bodyText1,)),
-                    Row(children: [
-                      Align(alignment: Alignment.centerLeft,child: Text(widget.theBus.title!,style: Theme.of(context).textTheme.bodyText1,)),
-                      // Align(alignment: Alignment.centerLeft,child: Text('  ${fakeResult[1].agentName}',style: const TextStyle(color: Colors.grey),)),
-                    ],),
-                    Row(children: [
-                      Text('年份：${widget.theBus.vehicalYearOfManufacture!}'),
-                      const SizedBox(width: 20,),
-                      Text('座位：${widget.theBus.vehicalSeats} 人'),
-                    ],),
-                    Align(alignment: Alignment.centerLeft,child: Text('${DateFormat('MM / dd EEE').format(widget.startDate)} - ${DateFormat('MM / dd EEE').format(widget.endDate)}')),
-                    Row(children: [
-                      // const Align(alignment: Alignment.centerLeft,child: Text('App優惠價 '),),
-                      // Align(alignment: Alignment.centerLeft,child: Text('\$${_getDaysInterval()*11000}',style: Theme.of(context).textTheme.subtitle2,),),
-                      Align(alignment: Alignment.centerLeft,child: Text(' (訂金 ${_getDaysInterval()*1000})'),),
-                    ],),
-
-                  ],
-                ),
-              ),
-              const Divider(
-                color: AppColor.superLightGrey,
-                thickness: 8,
-              ),
-              CustomElevatedButton(
-                color: AppColor.yellow,
-                title: '確認，下訂單',
-                onPressed: (){
-                  if(isAgreementChecked) {
-                    var userModel = context.read<UserModel>();
-
-                    Order theOrder = Order();
-                    theOrder.tourBus = widget.theBus.id;
-                    theOrder.startDate = DateFormat('yyyy-MM-dd').format(widget.startDate);
-                    theOrder.endDate = DateFormat('yyyy-MM-dd').format(widget.endDate);
-                    theOrder.depatureCity = widget.fromCity;
-                    theOrder.destinationCity = widget.toCity;
-                    theOrder.orderMoney = _getDaysInterval()*11000;
-                    theOrder.depositMoney = _getDaysInterval()*1000;
-                    // print(userModel.token!);
-                    _httpPostCreateOrder(theOrder, userModel.token!);
-                  }else{
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("請先勾選同意租賃合約書！"),));
-                  }
-                },),
-              const SizedBox(height: 20,)
-            ],
-          ),
-        )
+            ),
+            child:SingleChildScrollView(
+                child: Text(agreementText))),
     );
-  }
-
-  int _getDaysInterval(){
-    return (-widget.startDate.difference(widget.endDate).inDays)+1;
-  }
-
-  Future _httpPostCreateOrder(Order theOrder, String token) async {
-
-    String path = Service.ORDERS;
-
-    try {
-      Map queryParameters = {
-        'tourBus': theOrder.tourBus,
-        'startDate': theOrder.startDate!+"T00:00:00Z",
-        'endDate': theOrder.endDate!+"T00:00:00Z",
-        'depatureCity': theOrder.depatureCity!,
-        'destinationCity': theOrder.destinationCity!,
-        'orderMoney': theOrder.orderMoney,
-        'depositMoney': theOrder.depositMoney,
-      };
-
-      print(queryParameters);
-
-      final response = await http.post(Service.standard(path: path),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'token $token'
-          },
-          body: jsonEncode(queryParameters)
-      );
-      print(response.body);
-      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
-      if(map['id']!=null){
-        Navigator.pushNamed(context, '/rental_confirmation');
-      }
-    } catch(e){
-      print(e);
-    }
   }
 
 }

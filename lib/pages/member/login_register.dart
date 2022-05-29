@@ -15,6 +15,8 @@ import 'package:flutter_tour_bus_new/models/user.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 class LoginRegister extends StatefulWidget {
   const LoginRegister({Key? key}) : super(key: key);
 
@@ -78,99 +80,117 @@ class _LoginRegisterState extends State<LoginRegister> {
                 //     MaterialPageRoute(builder: (context) => const RentalAgreement()));
               },
             ),
-            GestureDetector(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 30),
-                alignment: Alignment.centerRight,
-                child: Text(
-                  '註冊',
-                  style: TextStyle(color: Colors.yellow.shade700,decoration: TextDecoration.underline,),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushNamed(context, '/register_phone').then((value){
-                  var userModel = context.read<UserModel>();
-                  if(userModel.user != null){
-                    Navigator.pop(context,"ok");
-                  }
-                });
-              },
-            ),
 
-            Consumer<UserModel>(builder: (context, userModel, child) =>
-                (userModel.platformType=="android")?
-                Container():
-                Column(
-                  children: [
-                    const Divider(
-                      height: 30,
-                      color: Colors.black87,
-                      indent: 30,
-                      endIndent: 30,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '忘記密碼',
+                      style: TextStyle(color: Colors.yellow.shade700,decoration: TextDecoration.underline,),
                     ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 30),
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: const Color(0xFF00B900),
-                              elevation: 0
-                          ),
-                          onPressed: (){
-                            print("line button pressed");
-                            _lineSignIn(context);
-                          },
-                          child: Container(
-                            height: 46,
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(flex:1, child:Container(
-                                  margin: const EdgeInsets.only(left: 10),
-                                  alignment: Alignment.centerLeft,
-                                  width: 40,
-                                  child: const Icon(FontAwesomeIcons.line),
-                                )),
-                                Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
-                                Expanded(flex:1, child:Container()),
-                              ],
-                            ),
-                          )
-                      ),
-                    )
-                  ],
-                )
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/reset_password_phone');
+                  },
+                ),
+                GestureDetector(
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(0,0,30,0),
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '註冊',
+                      style: TextStyle(color: Colors.yellow.shade700,decoration: TextDecoration.underline,),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/register_phone').then((value){
+                      var userModel = context.read<UserModel>();
+                      if(userModel.user != null){
+                        Navigator.pop(context,"ok");
+                      }
+                    });
+                  },
+                ),
+              ],
             ),
-            // Container(
-            //   margin: const EdgeInsets.symmetric(horizontal: 30),
-            //   child: ElevatedButton(
-            //       style: ElevatedButton.styleFrom(
-            //           primary: const Color(0xFF00B900),
-            //           elevation: 0
-            //       ),
-            //       onPressed: (){
-            //         print("line button pressed");
-            //         _lineSignIn(context);
-            //       },
-            //       child: Container(
-            //         height: 46,
-            //         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
-            //         child: Row(
-            //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //           children: [
-            //             Expanded(flex:1, child:Container(
-            //               margin: const EdgeInsets.only(left: 10),
-            //               alignment: Alignment.centerLeft,
-            //               width: 40,
-            //               child: const Icon(FontAwesomeIcons.line),
-            //             )),
-            //             Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
-            //             Expanded(flex:1, child:Container()),
-            //           ],
-            //         ),
-            //       )
-            //   ),
-            // ),
+            Column(
+              children: [
+                const Divider(
+                  height: 30,
+                  color: Colors.black87,
+                  indent: 30,
+                  endIndent: 30,
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 30),
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          primary: const Color(0xFF00B900),
+                          elevation: 0
+                      ),
+                      onPressed: (){
+                        print("line button pressed");
+                        _lineSignIn(context);
+                      },
+                      child: Container(
+                        height: 46,
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(flex:1, child:Container(
+                              margin: const EdgeInsets.only(left: 10),
+                              alignment: Alignment.centerLeft,
+                              width: 40,
+                              child: const Icon(FontAwesomeIcons.line),
+                            )),
+                            Expanded(flex:3, child:Container(child: const Text('使用LINE繼續',textAlign: TextAlign.center,),)),
+                            Expanded(flex:1, child:Container()),
+                          ],
+                        ),
+                      )
+                  ),
+                ),
+                Consumer<UserModel>(builder: (context, userModel, child) =>
+                  (userModel.platformType=="android")?
+                  Container():
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 30),
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            primary: const Color(0xFF000000),
+                            elevation: 0
+                        ),
+                        onPressed: (){
+                          print("apple button pressed");
+                          _singInWithApple(context);
+                        },
+                        child: Container(
+                          height: 46,
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(flex:1, child:Container(
+                                margin: const EdgeInsets.only(left: 10),
+                                alignment: Alignment.centerLeft,
+                                width: 40,
+                                child: const Icon(FontAwesomeIcons.apple),
+                              )),
+                              Expanded(flex:3, child:Container(child: const Text('透過Apple繼續',textAlign: TextAlign.center,),)),
+                              Expanded(flex:1, child:Container()),
+                            ],
+                          ),
+                        )
+                    ),
+                  )
+                ),
+              ],
+            ),
           ],
         ));
   }
@@ -203,7 +223,7 @@ class _LoginRegisterState extends State<LoginRegister> {
         userModel.setUser(user!);
         userModel.token = token;
 
-        _httpPostFCMDevice();
+        // _httpPostFCMDevice();
 
         Navigator.pop(context, 'ok');
 
@@ -243,15 +263,15 @@ class _LoginRegisterState extends State<LoginRegister> {
         userModel.token = token;
         userModel.isLineLogin = true;
 
-        _httpPostFCMDevice();
+        // _httpPostFCMDevice();
 
-        Navigator.pop(context);
+        Navigator.pop(context, 'ok');
       }else{
 
         await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RegisterIdentitySocial(displayName: displayName, lineId: lineId),
+              builder: (context) => RegisterIdentitySocial(displayName: displayName, lineId: lineId, appleId: ""),
             )
         );
 
@@ -267,6 +287,51 @@ class _LoginRegisterState extends State<LoginRegister> {
     }
   }
 
+  Future<void> _singInWithApple(BuildContext context) async{
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+    final String appleId = credential.userIdentifier!;
+
+    String displayName = '';
+    try{
+      displayName = credential.givenName! + credential.familyName!;
+    }catch(e){
+      print(e);
+    }
+
+    String? token = await _getUserTokenFromApple(appleId);
+    print("userToken $token");
+
+    if(token != null){
+      User? user = await _getUserData(token);
+
+      var userModel = context.read<UserModel>();
+      userModel.setUser(user!);
+      userModel.token = token;
+
+      // _httpPostFCMDevice();
+
+      Navigator.pop(context);
+    }else{
+      await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegisterIdentitySocial(displayName: displayName, lineId: "", appleId: appleId),
+          )
+      );
+
+      var userModel = context.read<UserModel>();
+      if(userModel.user != null){
+        Navigator.pop(context, 'ok');
+      }else{
+        ScaffoldMessenger.of(context)..removeCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('未成功建立使用者！')));
+      }
+    }
+  }
+
   Future<String?> _getUserTokenFromLine(String lineId) async {
     String path = Service.PATH_USER_TOKEN;
     try {
@@ -274,6 +339,37 @@ class _LoginRegisterState extends State<LoginRegister> {
         'phone': '00000',
         'password': '00000',
         'line_id': lineId,
+      };
+
+      final response = await http.post(
+          Service.standard(path: path),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(queryParameters)
+      );
+
+      Map<String, dynamic> map = json.decode(utf8.decode(response.body.runes.toList()));
+      if(map['token']!=null){
+        String token = map['token'];
+        return token;
+      }else{
+        print(response.body);
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<String?> _getUserTokenFromApple(String appleId) async {
+    String path = Service.PATH_USER_TOKEN;
+    try {
+      Map queryParameters = {
+        'phone': '00000',
+        'password': '00000',
+        'apple_id': appleId,
       };
 
       final response = await http.post(
@@ -346,29 +442,29 @@ class _LoginRegisterState extends State<LoginRegister> {
     }
   }
 
-  Future<void> _httpPostFCMDevice() async {
-    print("postFCMDevice");
-    String path = Service.PATH_REGISTER_DEVICE;
-    var userModel = context.read<UserModel>();
-
-    try {
-      Map queryParameters = {
-        'user_id': userModel.user!.id.toString(),
-        'registration_id': userModel.fcmToken,
-        'device_id': userModel.deviceId,
-        'type': userModel.platformType!,
-      };
-
-      final response = await http.post(
-          Service.standard(path: path),
-          body: queryParameters,
-      );
-
-      print(response.body);
-
-    }catch(e){
-      print(e);
-    }
-  }
+  // Future<void> _httpPostFCMDevice() async {
+  //   print("postFCMDevice");
+  //   String path = Service.PATH_REGISTER_DEVICE;
+  //   var userModel = context.read<UserModel>();
+  //
+  //   try {
+  //     Map queryParameters = {
+  //       'user_id': userModel.user!.id.toString(),
+  //       'registration_id': userModel.fcmToken,
+  //       'device_id': userModel.deviceId,
+  //       'type': userModel.platformType!,
+  //     };
+  //
+  //     final response = await http.post(
+  //         Service.standard(path: path),
+  //         body: queryParameters,
+  //     );
+  //
+  //     print(response.body);
+  //
+  //   }catch(e){
+  //     print(e);
+  //   }
+  // }
 
 }

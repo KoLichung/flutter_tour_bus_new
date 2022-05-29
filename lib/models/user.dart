@@ -3,6 +3,7 @@ class User {
   String? phone;
   String? name;
   bool? isOwner;
+  bool? isPassed;
   String? company;
   String? address;
   String? vehicalLicence;
@@ -18,6 +19,7 @@ class User {
         this.phone,
         this.name,
         this.isOwner,
+        this.isPassed,
         this.company,
         this.address,
         this.vehicalLicence,
@@ -36,6 +38,11 @@ class User {
       isOwner = json['isOwner'];
     }else{
       isOwner = false;
+    }
+    if(json['isPassed']!=null){
+      isPassed = json['isPassed'];
+    }else{
+      isPassed = false;
     }
     if(json['company']!=null){
       company = json['company'];
@@ -88,6 +95,7 @@ class User {
     data['phone'] = this.phone;
     data['name'] = this.name;
     data['isOwner'] = this.isOwner;
+    data['isPassed'] = this.isPassed;
     data['company'] = this.company;
     data['address'] = this.address;
     data['vehicalLicence'] = this.vehicalLicence;

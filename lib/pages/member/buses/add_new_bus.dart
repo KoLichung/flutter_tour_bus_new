@@ -78,6 +78,7 @@ class _AddNewBusState extends State<AddNewBus> {
             children: [
               const SizedBox(height: 20,),
               driverInputRow('標題：',carTitleController, false),
+              Container(child: Text("(標題請勿輸入數字)"),width: double.infinity,margin: const EdgeInsets.symmetric(horizontal: 30) ),
               driverInputRow('牌照：',licenseController, false),
               driverInputRow('車主：',ownerController, false),
               // driverInputRow('引擎號碼：',engineNumController, false),
@@ -193,7 +194,7 @@ class _AddNewBusState extends State<AddNewBus> {
                       )
                     ]
                   ),],),
-              imageUploadButtonTitle('外觀照片(1~5張)：'),
+              imageUploadButtonTitle('外觀照片(1~2張)：'),
               Row(
                 children: [
                   ImageUploadButton(
@@ -209,10 +210,10 @@ class _AddNewBusState extends State<AddNewBus> {
                         if(pickedFile == null) return;
                         if(pickedFile.isNotEmpty){
                           for(XFile file in pickedFile){
-                            if(outLookImageList.length < 5){
+                            if(outLookImageList.length < 2){
                               outLookImageList.add(file);
                             }else{
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("外觀照片需少於等於 5 張！"),));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("外觀照片需少於等於 2 張！"),));
                             }
                           }
                         }
@@ -277,7 +278,7 @@ class _AddNewBusState extends State<AddNewBus> {
                         ),
                   ),],
               ),
-              imageUploadButtonTitle('內裝照片(1~5張)：'),
+              imageUploadButtonTitle('內裝照片(1~3張)：'),
               Row(
                 children: [
                   ImageUploadButton(
@@ -293,10 +294,10 @@ class _AddNewBusState extends State<AddNewBus> {
                         if(pickedFile == null) return;
                         if(pickedFile.isNotEmpty){
                           for(XFile file in pickedFile){
-                            if(interiorImageList.length < 5){
+                            if(interiorImageList.length < 3){
                               interiorImageList.add(file);
                             }else{
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("內裝照片需少於等於 5 張！"),));
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("內裝照片需少於等於 3 張！"),));
                             }
                           }
                         }
@@ -547,8 +548,8 @@ class _AddNewBusState extends State<AddNewBus> {
 
   getLocationCity(){
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      padding: EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 6),
       decoration: BoxDecoration(
         border: Border.all(
           color: AppColor.grey,
@@ -579,8 +580,8 @@ class _AddNewBusState extends State<AddNewBus> {
 
   getLocationDistrict(){
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      padding: EdgeInsets.symmetric(horizontal: 8,vertical: 6),
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 6),
       decoration: BoxDecoration(
         border: Border.all(
           color: AppColor.grey,
@@ -648,7 +649,7 @@ class _AddNewBusState extends State<AddNewBus> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("成功更新！"),));
-    Navigator.pop(context);
+    Navigator.pop(context,"success");
   }
 
   Future _uploadLicenceImage(XFile? image, XFile? driverImage, String token, int busId)async{

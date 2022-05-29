@@ -92,8 +92,7 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
         //       child:
         //       const Text('狀態說明', style: TextStyle(fontSize: 15),),),)],
       ),
-      body: Column(
-        children: [
+      body:
           ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
@@ -110,10 +109,10 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
                       trailing: _getOrderStatusButton(orderList[i],context),
                       // trailing: Text(orderList[i].state), //要判斷state內容顯示不同的(外框文字)狀態
                       title: Text('名稱：${orderList[i].busTitle!}'),
-                      subtitle: Text('車錢：\$${orderList[i].orderMoney!}  訂金：${orderList[i].depositMoney!}  \n租車日期： $startDate~$endDate'),
+                      subtitle: Text('訂金：${orderList[i].depositMoney!}  \n租車日期： $startDate~$endDate'),
                     ),
                     const Divider(color: AppColor.lightGrey,)],);
-              }),],
+              },
       ),
     );
   }
@@ -208,6 +207,7 @@ class PassengerOrderStatus {
 
   String token = "";
   Order? order;
+  bool isLoadingToken = false;
 
   PassengerOrderStatus(this.order);
 
@@ -259,7 +259,14 @@ class PassengerOrderStatus {
   waitingForPayment(context){
     return GestureDetector(
       onTap: (){
-        _fetchPaymentToken(context, order!);
+        if(!isLoadingToken){
+          isLoadingToken = true;
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("取得付款資訊中~"),));
+          _fetchPaymentToken(context, order!);
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("請等待付款資訊回應~"),));
+        }
+
 
         // Navigator.push(
         //     context,
@@ -337,6 +344,7 @@ class PassengerOrderStatus {
       };
 
       final response = await http.get(Service.standard(path: path, queryParameters: queryParameters));
+      isLoadingToken = false;
 
       if (response.statusCode == 200) {
         // print(response.body);

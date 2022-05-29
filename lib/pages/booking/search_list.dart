@@ -46,26 +46,7 @@ class _SearchListState extends State<SearchList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('${widget.fromCity} ${DateFormat('MM/dd').format(widget.startDate)}~${DateFormat('MM/dd').format(widget.endDate)}'),),
-      body: Column(
-        children: [
-          checkBusResult(),
-          GestureDetector(
-            child: const Text('沒有符合的需求，填寫需求單', style: TextStyle(color: AppColor.yellow, fontSize: 20, decoration: TextDecoration.underline,),),
-            onTap: (){
-              var userModel = context.read<UserModel>();
-              if(userModel.isLogin()){
-                Navigator.pushNamed(context, '/inquiry_form');
-              } else {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginRegister(),
-                    ));
-              }
-            }
-          ),
-        ],
-      ),
+      body: checkBusResult(),
       floatingActionButton: FloatingActionButton(
         elevation: 0,
         backgroundColor: AppColor.yellow,
@@ -93,59 +74,80 @@ class _SearchListState extends State<SearchList> {
       return ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          itemCount: topBusses.length+regularBuses.length,
+          itemCount: topBusses.length+regularBuses.length+1,
           itemBuilder:(BuildContext context,int i){
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    leading:getLeadingImage(i),
-                    title:
-                    (i<topBusses.length)?
-                    Text(topBusses[i].title!, style: Theme.of(context).textTheme.subtitle2)
-                    :
-                    Text(regularBuses[i-topBusses.length].title!, style: Theme.of(context).textTheme.subtitle2),
-                    // subtitle:RichText(
-                    //     text: TextSpan(text: busResult[i].vehicalBodyNumber,
-                    //             style:const TextStyle(color: AppColor.grey),
-                    //             children: <TextSpan>[
-                    //               TextSpan(text: '\n所在地：${busResult[i].city}\n年份：${busResult[i].vehicalYearOfManufacture!}  座位：${busResult[i].vehicalSeats}',
-                    //                 style: Theme.of(context).textTheme.bodyText2,),
-                    //             ],
-                    //           ),
-                    // ),
-                    subtitle:
-                    (i<topBusses.length)?
-                    Text('所在地：${topBusses[i].city}\n年份：${topBusses[i].vehicalYearOfManufacture!}  座位：${topBusses[i].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2)
-                    :
-                    Text('所在地：${regularBuses[i-topBusses.length].city}\n年份：${regularBuses[i-topBusses.length].vehicalYearOfManufacture!}  座位：${regularBuses[i-topBusses.length].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2),
+            if(i == topBusses.length+regularBuses.length){
+            return
+              Center(
+                child: GestureDetector(
+                    child: const Text('沒有符合的需求，填寫需求單', style: TextStyle(color: AppColor.yellow, fontSize: 20, decoration: TextDecoration.underline,),),
                     onTap: (){
-                      Bus? theBus;
-                      if(i<topBusses.length){
-                        theBus = topBusses[i];
-                      }else{
-                        theBus = regularBuses[i-topBusses.length];
+                      var userModel = context.read<UserModel>();
+                      if(userModel.isLogin()){
+                        Navigator.pushNamed(context, '/inquiry_form');
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginRegister(),
+                            ));
                       }
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RentalBusDetail(
-                              theBus: theBus!,
-                              fromCity: widget.fromCity,
-                              toCity: widget.toCity,
-                              startDate: widget.startDate,
-                              endDate: widget.endDate,
-                            ),
-                          ));
-                      // Navigator.pushNamed(context, '/bus_detail');
-                    },
+                    }),
+              );
+            }else{
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      leading:getLeadingImage(i),
+                      title:
+                      (i<topBusses.length)?
+                      Text(topBusses[i].title!, style: Theme.of(context).textTheme.subtitle2)
+                          :
+                      Text(regularBuses[i-topBusses.length].title!, style: Theme.of(context).textTheme.subtitle2),
+                      // subtitle:RichText(
+                      //     text: TextSpan(text: busResult[i].vehicalBodyNumber,
+                      //             style:const TextStyle(color: AppColor.grey),
+                      //             children: <TextSpan>[
+                      //               TextSpan(text: '\n所在地：${busResult[i].city}\n年份：${busResult[i].vehicalYearOfManufacture!}  座位：${busResult[i].vehicalSeats}',
+                      //                 style: Theme.of(context).textTheme.bodyText2,),
+                      //             ],
+                      //           ),
+                      // ),
+                      subtitle:
+                      (i<topBusses.length)?
+                      Text('所在地：${topBusses[i].city}\n年份：${topBusses[i].vehicalYearOfManufacture!}  座位：${topBusses[i].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2)
+                          :
+                      Text('所在地：${regularBuses[i-topBusses.length].city}\n年份：${regularBuses[i-topBusses.length].vehicalYearOfManufacture!}  座位：${regularBuses[i-topBusses.length].vehicalSeats}', style: Theme.of(context).textTheme.bodyText2),
+                      onTap: (){
+                        Bus? theBus;
+                        if(i<topBusses.length){
+                          theBus = topBusses[i];
+                        }else{
+                          theBus = regularBuses[i-topBusses.length];
+                        }
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RentalBusDetail(
+                                theBus: theBus!,
+                                fromCity: widget.fromCity,
+                                toCity: widget.toCity,
+                                startDate: widget.startDate,
+                                endDate: widget.endDate,
+                              ),
+                            ));
+                        // Navigator.pushNamed(context, '/bus_detail');
+                      },
+                    ),
                   ),
-                ),
-                const Divider(color: Colors.grey,)
-              ],
-            );
-          } );
+                  const Divider(color: Colors.grey,)
+                ],
+              );
+            }
+          }
+          );
     }
   }
 
