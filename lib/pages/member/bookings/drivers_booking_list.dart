@@ -58,19 +58,23 @@ class _DriversBookingListState extends State<DriversBookingList> {
                       trailing: _getOrderStatusButton(userModel.token!, ownerOrderList[i], context),
                       // title: Text(ownerOrderList[i].d),
                       title:
-                      Text('${ownerOrderList[i].name} ${ownerOrderList[i].phone} \n名稱：${ownerOrderList[i].busTitle} \n'
+                      Text('${ownerOrderList[i].name} \n名稱：${ownerOrderList[i].busTitle} \n'
                           '租車日期： ${DateFormat("yyyy-MM-dd").format(DateTime.parse(ownerOrderList[i].startDate!))}~${DateFormat("yyyy-MM-dd").format(DateTime.parse(ownerOrderList[i].endDate!))} \n'
                           '出發地：${ownerOrderList[i].depatureCity} 目的地：${ownerOrderList[i].destinationCity}'
                         ,style: Theme.of(context).textTheme.bodyText2,),
                     onTap: () async {
-                      final result = await Navigator.push(
-                          context, MaterialPageRoute(
+                        if(ownerOrderList[i].state=='ownerWillContact' || ownerOrderList[i].state=='closed' ){
+                          final result = await Navigator.push(
+                              context, MaterialPageRoute(
                             builder: (context) => DriversBookingDetail(theOrder: ownerOrderList[i]),
-                        )
-                      );
-                      if(result=="ok"){
-                        _httpGetOwnerOrderList();
-                      }
+                          )
+                          );
+                          if(result=="ok"){
+                            _httpGetOwnerOrderList();
+                          }
+                        }else{
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("消費者付款後，才可看詳細資料~")));
+                        }
                         // Navigator.pushNamed(context, '/drivers_booking_detail');
                     },
                     ),
@@ -96,7 +100,8 @@ class _DriversBookingListState extends State<DriversBookingList> {
                 children: [
                   GestureDetector(
                     onTap: (){
-                      _httpPostUpdateOrderState(userToken, order.id!, "waitForDeposit");
+                      // _httpPostUpdateOrderState(userToken, order.id!, "waitForDeposit");
+                      _httpPostUpdateOrderState(userToken, order.id!, "waitForAtmDeposit");
                       Navigator.pop(context,"confirm");
                     },
                     child:const CustomOutlinedText(
@@ -119,7 +124,7 @@ class _DriversBookingListState extends State<DriversBookingList> {
       });
     }else if(order.state=="ownerCanceled"){
       return orderStatus.decline();
-    }else if(order.state=="waitForDeposit"){
+    }else if(order.state=="waitForDeposit" || order.state == "waitForAtmDeposit"){
       return orderStatus.waitingForPayment(context);
     }else if(order.state=="ownerWillContact"){
       return orderStatus.confirmed(context, (){

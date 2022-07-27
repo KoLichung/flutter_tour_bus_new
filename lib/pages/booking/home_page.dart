@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                                  child: Text('${DateFormat('MM / dd EEE').format(userModel.startDate)}  -  ${DateFormat('MM / dd EEE').format(userModel.endDate)}'),
+                                  child: Text('${DateFormat('MM / dd EEE').format(userModel.startDate)} - ${DateFormat('MM / dd EEE').format(userModel.endDate)}'),
                                 )
                             ),
                           ],),

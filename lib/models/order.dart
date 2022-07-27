@@ -14,6 +14,7 @@ class Order {
   String? aTMInfoBankCode;
   String? aTMInfovAccount;
   String? aTMInfoExpireDate;
+  String? aTMFiveDigit;
   String? busTitle;
   String? name;
   String? phone;
@@ -34,13 +35,18 @@ class Order {
         this.aTMInfoBankCode,
         this.aTMInfovAccount,
         this.aTMInfoExpireDate,
+        this.aTMFiveDigit,
         this.busTitle,
         this.name,
         this.phone});
 
   Order.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    user = json['user'];
+    if(json['user']!=null) {
+      user = json['user'];
+    }else{
+      user = null;
+    }
     tourBus = json['tourBus'];
     state = json['state'];
     startDate = json['startDate'];
@@ -62,9 +68,25 @@ class Order {
     }catch(e){
       print(e);
     }
+    if(json['ATMFiveDigit']!=null){
+      aTMFiveDigit = json['ATMFiveDigit'];
+    }else{
+      aTMFiveDigit = "";
+    }
     busTitle = json['busTitle'];
-    name = json['name'];
-    phone = json['phone'];
+
+    if (user != null){
+      try{
+        name = json['name'].toString().replaceAll(RegExp('[0-9]'), "");
+      }catch(e){
+        name = json['name'];
+      }
+      phone = json['phone'];
+    }else{
+      name = '用戶已刪除';
+      phone = '用戶已刪除';
+    }
+
   }
 
   Map<String, dynamic> toJson() {

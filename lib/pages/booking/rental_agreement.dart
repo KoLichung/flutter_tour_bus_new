@@ -45,7 +45,7 @@ class _RentalAgreementState extends State<RentalAgreement> {
 
     String agreementText = '''立契約書人
 承租人（以下簡稱甲方）${userModel.user?.name}
-出租人（以下簡稱乙方）${Service.BUS_COMPANY_NAME}，茲為遊覽車租賃事宜，雙方同意本契約條款如下：
+出租人（以下簡稱乙方）${widget.theBus.company}，茲為遊覽車租賃事宜，雙方同意本契約條款如下：
 
 第 一 條  
 本契約租賃車輛（以下簡稱本車輛，不含隨車服務人員）租賃期間自 $startDate 起至 $endDate 止，共計 $rentalDays 天。

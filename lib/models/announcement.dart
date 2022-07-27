@@ -26,8 +26,7 @@ class Announcement {
 
   Announcement.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    phone = json['phone'];
-    name = json['name'];
+
     announceDateTime = json['announceDateTime'];
     numbersOfPeople = json['numbersOfPeople'];
     startDateTime = json['startDateTime'];
@@ -35,7 +34,14 @@ class Announcement {
     depatureCity = json['depatureCity'];
     destinationCity = json['destinationCity'];
     memo = json['memo'];
-    user = json['user'];
+    if(json['user']!=null) {
+      user = json['user'];
+      phone = json['phone'];
+      name = json['name'];
+    }else{
+      name = '用戶已刪除';
+      phone = '用戶已刪除';
+    }
   }
 
   Map<String, dynamic> toJson() {

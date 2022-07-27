@@ -21,6 +21,7 @@ class Bus {
   String? coverImage;
   DateTime? recentStartDate;
   DateTime? recentEndDate;
+  String? company;
 
   Bus(
       {this.id,
@@ -42,7 +43,8 @@ class Bus {
         this.isTop,
         this.coverImage,
         this.recentStartDate,
-        this.recentEndDate});
+        this.recentEndDate,
+        this.company});
 
   Bus.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -90,6 +92,12 @@ class Bus {
       recentEndDate = DateTime.parse(json['recent_end_date']);
     }catch(e){
       print(e);
+    }
+
+    if(json['company']!=null){
+      company = json['company'];
+    }else{
+      company = "";
     }
   }
 

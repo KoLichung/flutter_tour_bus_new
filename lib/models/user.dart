@@ -33,7 +33,11 @@ class User {
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     phone = json['phone'];
-    name = json['name'];
+    try{
+      name = json['name'].toString().replaceAll(RegExp('[0-9]'), "");
+    }catch(e){
+      name = json['name'];
+    }
     if(json['isOwner']!=null){
       isOwner = json['isOwner'];
     }else{

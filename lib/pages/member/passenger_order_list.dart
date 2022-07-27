@@ -25,59 +25,59 @@ class _PassengerOrderListState extends State<PassengerOrderList> {
   List<Order> orderList =[];
   // PassengerOrderStatus orderStatus = PassengerOrderStatus();
 
-  static const EventChannel paymentCallBackChannel = EventChannel('samples.flutter.io/pay_ec_pay_call_back');
+  // static const EventChannel paymentCallBackChannel = EventChannel('samples.flutter.io/pay_ec_pay_call_back');
 
   @override
   void initState() {
     // TODO: implement initState
     _fetchOrderList();
     super.initState();
-    paymentCallBackChannel.receiveBroadcastStream().listen(_onPaymentState, onError: _onPaymentError);
+    // paymentCallBackChannel.receiveBroadcastStream().listen(_onPaymentState, onError: _onPaymentError);
   }
 
-  Future<void> _onPaymentState(Object? event) async {
-    print(event.toString());
-
-    if(event.toString().contains("{") && event.toString().contains("}")){
-      Map<String, dynamic> map = json.decode(event.toString());
-      // print(map["bankCode"]);
-      // print(map["vAccount"]);
-      // print(map["expireDate"]);
-      // print(map["orderId"]);
-      String dateString = "";
-      if(map["expireDate"].toString().contains("Optional")){
-        dateString = map["expireDate"].toString().replaceAll("Optional", "").replaceAll("(", "").replaceAll(")", "");
-        map["date"] = DateTime.parse(dateString);
-      }else{
-        dateString = map["expireDate"];
-        map["date"] = DateFormat('yyyy/MM/dd').parse(dateString);
-      }
-      // print(dateString);
-      // print(DateTime.parse(dateString));
-
-      print(map);
-      var userModel = context.read<UserModel>();
-      _httpPutUpdateOrderATMInfo(userModel.token!, map);
-    }
-
-    if(event.toString().contains("orderId=")){
-      int orderId = int.parse(event.toString().replaceAll("orderId=", ""));
-      final result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>  PaymentConfirmed(orderId: orderId),
-          ));
-      if(result == "ok"){
-        _fetchOrderList();
-      }
-    }else if(event.toString() == 'fail'){
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('交易失敗!')));
-    }
-  }
-
-  void _onPaymentError(Object error) {
-    print("payment state listen error");
-  }
+  // Future<void> _onPaymentState(Object? event) async {
+  //   print(event.toString());
+  //
+  //   if(event.toString().contains("{") && event.toString().contains("}")){
+  //     Map<String, dynamic> map = json.decode(event.toString());
+  //     // print(map["bankCode"]);
+  //     // print(map["vAccount"]);
+  //     // print(map["expireDate"]);
+  //     // print(map["orderId"]);
+  //     String dateString = "";
+  //     if(map["expireDate"].toString().contains("Optional")){
+  //       dateString = map["expireDate"].toString().replaceAll("Optional", "").replaceAll("(", "").replaceAll(")", "");
+  //       map["date"] = DateTime.parse(dateString);
+  //     }else{
+  //       dateString = map["expireDate"];
+  //       map["date"] = DateFormat('yyyy/MM/dd').parse(dateString);
+  //     }
+  //     // print(dateString);
+  //     // print(DateTime.parse(dateString));
+  //
+  //     print(map);
+  //     var userModel = context.read<UserModel>();
+  //     _httpPutUpdateOrderATMInfo(userModel.token!, map);
+  //   }
+  //
+  //   if(event.toString().contains("orderId=")){
+  //     int orderId = int.parse(event.toString().replaceAll("orderId=", ""));
+  //     final result = await Navigator.push(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) =>  PaymentConfirmed(orderId: orderId),
+  //         ));
+  //     if(result == "ok"){
+  //       _fetchOrderList();
+  //     }
+  //   }else if(event.toString() == 'fail'){
+  //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('交易失敗!')));
+  //   }
+  // }
+  //
+  // void _onPaymentError(Object error) {
+  //   print("payment state listen error");
+  // }
 
   @override
   Widget build(BuildContext context) {

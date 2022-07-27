@@ -27,7 +27,7 @@ class _InquiryNoticeSate extends  State<InquiryNotice> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('今日租賃需求公告'),),
+      appBar: AppBar(title: const Text('租賃需求公告'),),
       body: ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,

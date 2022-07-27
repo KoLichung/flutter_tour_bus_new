@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tour_bus_new/color.dart';
+import 'package:flutter_tour_bus_new/pages/member/editUser/confirm_delete_dialog.dart';
 import 'package:flutter_tour_bus_new/pages/member/editUser/edit_user_detail.dart';
 import 'package:flutter_tour_bus_new/pages/member/editUser/edit_user_password.dart';
 import '../../../widgets/custom_big_outlined_button.dart';
@@ -61,7 +63,27 @@ class _EditUserProfileState extends State<EditUserProfile> {
                 },
               ):
               Container(),
-          )
+          ),
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
+              child:OutlinedButton(
+                  onPressed: () {
+                    showDialog(context: context, builder: (_){return const ConfirmDeleteDialog();});
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(width: 1.0, color: AppColor.pending),
+                  ),
+                  child: SizedBox(
+                    height: 46,
+                    child: Align(
+                      child: Text(
+                        "刪除用戶並退出",
+                        style: const TextStyle(fontSize: 16,color: AppColor.pending)),
+                      alignment: Alignment.center,
+                    ),
+                  )
+              )
+          ),
         ],
       ),
 
